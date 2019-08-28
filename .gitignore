@@ -1,8 +1,0 @@
-target/
-**/*.rs.bk
-/Cargo.lock
-*.log
-.vscode/
-node_modules/
-.idea/
-pkg/
