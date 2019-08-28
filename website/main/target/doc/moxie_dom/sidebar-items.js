@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["document",""],["window",""]],"macro":[["mount","Signature"],["produce_dom","Signature"],["text",""]],"mod":[["elements",""],["events",""],["prelude",""]]});
