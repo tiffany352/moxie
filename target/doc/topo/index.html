@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `topo` crate."><meta name="keywords" content="rust, rustlang, rust-lang, topo"><title>topo - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="shortcut icon" href="../favicon.ico"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../topo/index.html'><div class='logo-container'><img src='../rust-logo.png' alt='logo'></div></a><p class='location'>Crate topo</p><div class="sidebar-elems"><a id='all-types' href='all.html'><p>See all topo's items</p></a><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'topo', ty: 'mod', relpath: '../'};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/topo/lib.rs.html#1-593' title='goto source code'>[src]</a></span><span class='in-band'>Crate <a class="mod" href=''>topo</a></span></h1><div class='docblock'><p><code>topo</code> provides tools for describing trees based on their runtime callgraph. Because normal
+synchronous control flow has a tree(ish)-shaped callgraph, this can be quite natural.</p>
+<p>Topologically-bound functions run within a context unique to the path in the runtime call
+graph of other topological functions preceding the current activation record.</p>
+<p>By running the same topologically-bound functions in a loop, we can observe changes to the
+structure over time.</p>
+<p>Defining a topological function results in a macro definition for binding the
+function to each callsite where it is invoked.</p>
+<p>Define a topologically-bound function with the <code>topo::bound</code> attribute:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">bound</span>]</span>
+<span class="kw">fn</span> <span class="ident">basic_topo</span>() <span class="op">-&gt;</span> <span class="ident">topo</span>::<span class="ident">Id</span> { <span class="ident">topo</span>::<span class="ident">Id</span>::<span class="ident">current</span>() }
+
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">bound</span>]</span>
+<span class="kw">fn</span> <span class="ident">tier_two</span>() <span class="op">-&gt;</span> <span class="ident">topo</span>::<span class="ident">Id</span> { <span class="macro">basic_topo</span><span class="macro">!</span>() }
+
+<span class="comment">// each of these functions will be run in separately identified</span>
+<span class="comment">// contexts as the source locations for their calls are different</span>
+<span class="kw">let</span> <span class="ident">first</span> <span class="op">=</span> <span class="macro">basic_topo</span><span class="macro">!</span>();
+<span class="kw">let</span> <span class="ident">second</span> <span class="op">=</span> <span class="macro">basic_topo</span><span class="macro">!</span>();
+<span class="macro">assert_ne</span><span class="macro">!</span>(<span class="ident">first</span>, <span class="ident">second</span>);
+
+<span class="kw">let</span> <span class="ident">third</span> <span class="op">=</span> <span class="macro">tier_two</span><span class="macro">!</span>();
+<span class="kw">let</span> <span class="ident">fourth</span> <span class="op">=</span> <span class="macro">tier_two</span><span class="macro">!</span>();
+<span class="macro">assert_ne</span><span class="macro">!</span>(<span class="ident">third</span>, <span class="ident">fourth</span>);
+<span class="macro">assert_ne</span><span class="macro">!</span>(<span class="ident">first</span>, <span class="ident">third</span>);
+<span class="macro">assert_ne</span><span class="macro">!</span>(<span class="ident">first</span>, <span class="ident">fourth</span>);
+<span class="macro">assert_ne</span><span class="macro">!</span>(<span class="ident">second</span>, <span class="ident">fourth</span>);</pre></div>
+<p>Because topological functions must be sensitive to the location at which they're invoked and
+bound to their parent, we transform the function definition into a macro so we can link
+the two activation records inside macro expansion. See the docs for the attribute for more
+detail and further discussion of the tradeoffs.</p>
+<p>TODO include diagram of topology</p>
+<p>TODO discuss creation of tree from &quot;abstract stack frames&quot; represented by topological
+invocations</p>
+<p>TODO discuss propagating environment values down the topological call tree</p>
+<p>TODO show example of a rendering loop</p>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Re-exports</a></h2>
+<table><tr><td><code>pub use topo_macro::<a class="attr" href="../topo_macro/attr.bound.html" title="attr topo_macro::bound">bound</a>;</code></td></tr></table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
+<table><tr class='module-item'><td><a class="macro" href="macro.call.html" title='topo::call macro'>call</a></td><td class='docblock-short'><p>Calls the provided expression within an [<code>Env</code>] bound to the callsite, optionally passing
+additional environment values to the child scope.</p>
+</td></tr><tr class='module-item'><td><a class="macro" href="macro.env.html" title='topo::env macro'>env</a></td><td class='docblock-short'><p>Declare additional environment values to expose to a child topological function's call tree.</p>
+</td></tr><tr class='module-item'><td><a class="macro" href="macro.root.html" title='topo::root macro'>root</a></td><td class='docblock-short'><p>Roots a topology at a particular callsite while calling the provided expression with the same
+convention as [<code>call</code>].</p>
+</td></tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table><tr class='module-item'><td><a class="struct" href="struct.Env.html" title='topo::Env struct'>Env</a></td><td class='docblock-short'><p>Immutable environment container for the current (sub)topology. Environment values can be
+provided by parent topological invocations (currently just with [<code>call</code>] and
+[<code>root</code>]), but child functions can only mutate their environment through interior
+mutability.</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.Id.html" title='topo::Id struct'>Id</a></td><td class='docblock-short'><p>Identifies an activation record in the call topology. This is implemented approximately similar
+to the <a href="https://en.wikipedia.org/wiki/Hash_consing">hash cons</a> of preceding topological function invocations' <code>Id</code>s.</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.Point.html" title='topo::Point struct'>Point</a></td><td class='docblock-short'><p>The root of a sub-graph within the overall topology formed at runtime by the call-graph of
+topological functions.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g., <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g., <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g., <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../";window.currentCrate = "topo";</script><script src="../aliases.js"></script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>
