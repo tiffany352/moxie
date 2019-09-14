@@ -179,6 +179,118 @@
 <span id="179">179</span>
 <span id="180">180</span>
 <span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">any</span>::{<span class="ident">Any</span>, <span class="ident">TypeId</span>},
@@ -187,178 +299,290 @@
     <span class="ident">rc</span>::<span class="ident">Rc</span>,
 };
 
-<span class="doccomment">/// Memoize the provided function at the bound callsite, invalidating previous results only if</span>
-<span class="doccomment">/// the explicitly passed argument has changed.</span>
+<span class="doccomment">/// Memoizes the provided function, storing the intermediate `Stored` value in memoization storage</span>
+<span class="doccomment">/// and calling `with` with a reference to it, skipping the initialization on subsequent executions.</span>
+<span class="doccomment">/// Returns whatever `with` returns.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// While we do have the option in Rust to compare the values of initializer closures we are passed,</span>
-<span class="doccomment">/// it places a significant constraint on the initializers themselves to only capture `Clone` values</span>
-<span class="doccomment">/// or to avoid mutating its captures to implement `Fn`. Instead we require that closures accept</span>
-<span class="doccomment">/// the memoized argument by reference rather than by value.</span>
-<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">bound</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">memo</span><span class="op">&lt;</span><span class="ident">Arg</span>, <span class="ident">Init</span>, <span class="ident">Output</span><span class="op">&gt;</span>(<span class="ident">arg</span>: <span class="ident">Arg</span>, <span class="ident">initializer</span>: <span class="ident">Init</span>) <span class="op">-&gt;</span> <span class="ident">Output</span>
+<span class="doccomment">/// Marks the memoized value as `Live` in the current `Revision`.</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">memo_with</span><span class="op">&lt;</span><span class="ident">Arg</span>, <span class="ident">Stored</span>, <span class="ident">Ret</span><span class="op">&gt;</span>(
+    <span class="ident">arg</span>: <span class="ident">Arg</span>,
+    <span class="ident">init</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">Arg</span>) <span class="op">-&gt;</span> <span class="ident">Stored</span>,
+    <span class="ident">with</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">Stored</span>) <span class="op">-&gt;</span> <span class="ident">Ret</span>,
+) <span class="op">-&gt;</span> <span class="ident">Ret</span>
 <span class="kw">where</span>
     <span class="ident">Arg</span>: <span class="ident">PartialEq</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="ident">Output</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Init</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Arg</span>) <span class="op">-&gt;</span> <span class="ident">Output</span>,
+    <span class="ident">Stored</span>: <span class="lifetime">&#39;static</span>,
+    <span class="ident">Ret</span>: <span class="lifetime">&#39;static</span>,
 {
-    <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> (<span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">Output</span><span class="op">&gt;</span>(), <span class="ident">topo</span>::<span class="ident">Id</span>::<span class="ident">current</span>());
     <span class="kw">let</span> <span class="ident">store</span> <span class="op">=</span> <span class="ident">topo</span>::<span class="ident">Env</span>::<span class="ident">expect</span>::<span class="op">&lt;</span><span class="ident">MemoStore</span><span class="op">&gt;</span>();
-    <span class="ident">store</span>.<span class="ident">get_or_init</span>(<span class="ident">key</span>, <span class="ident">arg</span>, <span class="ident">initializer</span>)
+    <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> (
+        <span class="ident">topo</span>::<span class="ident">Id</span>::<span class="ident">current</span>(),
+        <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">Arg</span><span class="op">&gt;</span>(),
+        <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">Stored</span><span class="op">&gt;</span>(),
+    );
+
+    <span class="comment">// to allow nested memo_with calls, we separate mutable borrows of `store` from the callbacks:</span>
+    <span class="comment">//</span>
+    <span class="comment">// * with &amp;mut store</span>
+    <span class="comment">//   * remove optionally-cached value from storage</span>
+    <span class="comment">// * call functions producing cached and returned values</span>
+    <span class="comment">// * with &amp;mut store</span>
+    <span class="comment">//   * store cached value as Live, return returned value</span>
+
+    <span class="kw">let</span> <span class="ident">stored</span> <span class="op">=</span> { <span class="ident">store</span>.<span class="number">0</span>.<span class="ident">borrow_mut</span>().<span class="ident">memos</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) };
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">with</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">with</span>); <span class="comment">// wrapping in an option dodges the borrow checker for closures</span>
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cached</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">boxed</span>)) <span class="op">=</span> <span class="ident">stored</span> {
+        <span class="kw">let</span> <span class="ident">boxed</span>: <span class="ident">Box</span><span class="op">&lt;</span>(<span class="ident">Arg</span>, <span class="ident">Stored</span>)<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">boxed</span>.<span class="ident">downcast</span>().<span class="ident">unwrap</span>();
+
+        <span class="kw">if</span> <span class="ident">boxed</span>.<span class="number">0</span> <span class="op">==</span> <span class="ident">arg</span> {
+            <span class="kw">let</span> <span class="ident">with</span> <span class="op">=</span> <span class="ident">with</span>.<span class="ident">take</span>().<span class="ident">unwrap</span>();
+            <span class="ident">cached</span> <span class="op">=</span> <span class="prelude-val">Some</span>((<span class="ident">with</span>(<span class="kw-2">&amp;</span><span class="ident">boxed</span>.<span class="number">1</span>), <span class="ident">boxed</span>));
+        }
+    };
+
+    <span class="kw">let</span> (<span class="ident">returned</span>, <span class="ident">boxed</span>) <span class="op">=</span> <span class="ident">cached</span>.<span class="ident">unwrap_or_else</span>(<span class="op">||</span> {
+        <span class="kw">let</span> <span class="ident">with</span> <span class="op">=</span> <span class="ident">with</span>.<span class="ident">take</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">fresh</span> <span class="op">=</span> <span class="ident">init</span>(<span class="kw-2">&amp;</span><span class="ident">arg</span>);
+        (<span class="ident">with</span>(<span class="kw-2">&amp;</span><span class="ident">fresh</span>), <span class="ident">Box</span>::<span class="ident">new</span>((<span class="ident">arg</span>, <span class="ident">fresh</span>)))
+    });
+
+    <span class="ident">store</span>
+        .<span class="number">0</span>
+        .<span class="ident">borrow_mut</span>()
+        .<span class="ident">memos</span>
+        .<span class="ident">insert</span>(<span class="ident">key</span>, (<span class="ident">Liveness</span>::<span class="ident">Live</span>, <span class="ident">boxed</span> <span class="kw">as</span> <span class="kw">_</span>));
+
+    <span class="ident">returned</span>
 }
 
-<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">bound</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">once</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">&gt;</span>(<span class="ident">expr</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>() <span class="op">-&gt;</span> <span class="ident">Output</span>) <span class="op">-&gt;</span> <span class="ident">Output</span>
+<span class="doccomment">/// Memoizes `expr` once at the callsite. Runs `with` on every iteration.</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">once_with</span><span class="op">&lt;</span><span class="ident">Stored</span>, <span class="ident">Ret</span><span class="op">&gt;</span>(
+    <span class="ident">expr</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>() <span class="op">-&gt;</span> <span class="ident">Stored</span>,
+    <span class="ident">with</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">Stored</span>) <span class="op">-&gt;</span> <span class="ident">Ret</span>,
+) <span class="op">-&gt;</span> <span class="ident">Ret</span>
 <span class="kw">where</span>
-    <span class="ident">Output</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">Stored</span>: <span class="lifetime">&#39;static</span>,
+    <span class="ident">Ret</span>: <span class="lifetime">&#39;static</span>,
+{
+    <span class="macro">memo_with</span><span class="macro">!</span>((), <span class="op">|</span><span class="kw-2">&amp;</span>()<span class="op">|</span> <span class="ident">expr</span>(), <span class="ident">with</span>)
+}
+
+<span class="doccomment">/// Memoize the provided function&#39;s output at this `topo::id`.</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">memo</span><span class="op">&lt;</span><span class="ident">Arg</span>, <span class="ident">Stored</span><span class="op">&gt;</span>(<span class="ident">arg</span>: <span class="ident">Arg</span>, <span class="ident">init</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">Arg</span>) <span class="op">-&gt;</span> <span class="ident">Stored</span>) <span class="op">-&gt;</span> <span class="ident">Stored</span>
+<span class="kw">where</span>
+    <span class="ident">Arg</span>: <span class="ident">PartialEq</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">Stored</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+{
+    <span class="macro">memo_with</span><span class="macro">!</span>(<span class="ident">arg</span>, <span class="ident">init</span>, <span class="ident">Clone</span>::<span class="ident">clone</span>)
+}
+
+<span class="doccomment">/// Runs the provided expression once per [`topo::Id`], repeated calls at the same `Id` are assigned</span>
+<span class="doccomment">/// adjacent slots. The provided value will always be cloned on subsequent calls unless dropped</span>
+<span class="doccomment">/// from storage.</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">once</span><span class="op">&lt;</span><span class="ident">Stored</span><span class="op">&gt;</span>(<span class="ident">expr</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>() <span class="op">-&gt;</span> <span class="ident">Stored</span>) <span class="op">-&gt;</span> <span class="ident">Stored</span>
+<span class="kw">where</span>
+    <span class="ident">Stored</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
     <span class="macro">memo</span><span class="macro">!</span>((), <span class="op">|</span>()<span class="op">|</span> <span class="ident">expr</span>())
 }
 
+<span class="doccomment">/// A shared pointer to the memoization storage singleton for a given runtime.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">MemoStore</span>(<span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">MemoStorage</span><span class="op">&gt;&gt;</span>);
 
 <span class="kw">impl</span> <span class="ident">MemoStore</span> {
+    <span class="doccomment">/// Drops memoized values that were not referenced during the last tick and resets callsite</span>
+    <span class="doccomment">/// repetition counts to 0.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">borrow_mut</span>().<span class="ident">gc</span>();
     }
-
-    <span class="kw">fn</span> <span class="ident">get_or_init</span><span class="op">&lt;</span><span class="ident">Arg</span>, <span class="ident">Output</span>, <span class="ident">Init</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">memo_key</span>: <span class="ident">MemoKey</span>,
-        <span class="ident">arg</span>: <span class="ident">Arg</span>,
-        <span class="ident">initializer</span>: <span class="ident">Init</span>,
-    ) <span class="op">-&gt;</span> <span class="ident">Output</span>
-    <span class="kw">where</span>
-        <span class="ident">Arg</span>: <span class="ident">PartialEq</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-        <span class="ident">Output</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-        <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Init</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Arg</span>) <span class="op">-&gt;</span> <span class="ident">Output</span>,
-    {
-        <span class="kw">let</span> <span class="ident">maybe_memod</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">borrow_mut</span>().<span class="ident">get_if_arg_eq</span>(<span class="ident">memo_key</span>, <span class="kw-2">&amp;</span><span class="ident">arg</span>);
-        <span class="comment">// ^ this binding is necessary to keep the below borrow_mut from panicking</span>
-        <span class="ident">maybe_memod</span>.<span class="ident">unwrap_or_else</span>(<span class="op">||</span> {
-            <span class="kw">let</span> <span class="ident">new_output</span> <span class="op">=</span> <span class="ident">initializer</span>(<span class="kw-2">&amp;</span><span class="ident">arg</span>);
-            <span class="self">self</span>.<span class="number">0</span>
-                .<span class="ident">borrow_mut</span>()
-                .<span class="ident">insert</span>(<span class="ident">memo_key</span>, <span class="ident">arg</span>, <span class="ident">new_output</span>.<span class="ident">clone</span>());
-            <span class="ident">new_output</span>
-        })
-    }
 }
 
-<span class="kw">type</span> <span class="ident">MemoKey</span> <span class="op">=</span> (<span class="ident">TypeId</span>, <span class="ident">topo</span>::<span class="ident">Id</span>);
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
+<span class="doccomment">/// The memoization storage for a `Runtime`. Stores memoized values by callsite, type, and a caller-</span>
+<span class="doccomment">/// provided slot (a key for an internal hashmap)</span>
+<span class="doccomment">/// exposing a garbage collection API to the embedding `Runtime`. Also tracks the number of times a</span>
+<span class="doccomment">/// callsite has been invoked during a given `Revision`, allowing memoization to work without an</span>
+<span class="doccomment">/// explicit slot.</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">MemoStorage</span> {
-    <span class="ident">inner</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">MemoKey</span>, <span class="ident">Rc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Any</span><span class="op">&gt;&gt;</span>,
-    <span class="ident">next</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">MemoKey</span>, <span class="ident">Rc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Any</span><span class="op">&gt;&gt;</span>,
+    <span class="ident">memos</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">MemoIndex</span>, (<span class="ident">Liveness</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Any</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
+}
+<span class="kw">type</span> <span class="ident">MemoIndex</span> <span class="op">=</span> (<span class="ident">topo</span>::<span class="ident">Id</span>, <span class="ident">TypeId</span>, <span class="ident">TypeId</span>);
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">MemoStorage</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
+        <span class="ident">MemoStorage</span> {
+            <span class="ident">memos</span>: <span class="ident">HashMap</span>::<span class="ident">new</span>(),
+        }
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">MemoStorage</span> {
-    <span class="kw">fn</span> <span class="ident">get_if_arg_eq</span><span class="op">&lt;</span><span class="ident">Arg</span>, <span class="ident">Output</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="ident">MemoKey</span>, <span class="ident">arg</span>: <span class="kw-2">&amp;</span><span class="ident">Arg</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">Arg</span>: <span class="ident">PartialEq</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-        <span class="ident">Output</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">existing</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
-            <span class="kw">let</span> (<span class="kw-2">ref</span> <span class="ident">prev_arg</span>, <span class="kw-2">ref</span> <span class="ident">output</span>): <span class="kw-2">&amp;</span>(<span class="ident">Arg</span>, <span class="ident">Output</span>) <span class="op">=</span> <span class="ident">existing</span>.<span class="ident">downcast_ref</span>().<span class="ident">unwrap</span>();
-
-            <span class="kw">if</span> <span class="ident">prev_arg</span> <span class="op">==</span> <span class="ident">arg</span> {
-                <span class="self">self</span>.<span class="ident">next</span>.<span class="ident">insert</span>(<span class="ident">key</span>, <span class="ident">existing</span>.<span class="ident">clone</span>()); <span class="comment">// ensure this is live when we gc</span>
-                <span class="prelude-val">Some</span>(<span class="ident">output</span>.<span class="ident">to_owned</span>())
-            } <span class="kw">else</span> {
-                <span class="prelude-val">None</span>
-            }
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        }
-    }
-
-    <span class="kw">fn</span> <span class="ident">insert</span><span class="op">&lt;</span><span class="ident">Arg</span>: <span class="lifetime">&#39;static</span>, <span class="ident">Output</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="ident">MemoKey</span>, <span class="ident">arg</span>: <span class="ident">Arg</span>, <span class="ident">val</span>: <span class="ident">Output</span>) {
-        <span class="kw">let</span> <span class="ident">to_insert</span> <span class="op">=</span> <span class="ident">Rc</span>::<span class="ident">new</span>((<span class="ident">arg</span>, <span class="ident">val</span>));
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">insert</span>(<span class="ident">key</span>, <span class="ident">to_insert</span>.<span class="ident">clone</span>());
-        <span class="self">self</span>.<span class="ident">next</span>.<span class="ident">insert</span>(<span class="ident">key</span>, <span class="ident">to_insert</span>.<span class="ident">clone</span>());
-    }
-
+    <span class="doccomment">/// Drops memoized values that were not referenced during the last tick, removing all `Dead`</span>
+    <span class="doccomment">/// storage values and sets all remaining values to `Dead` for the next mark.</span>
     <span class="kw">fn</span> <span class="ident">gc</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">swap</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">inner</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">next</span>);
-        <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">next</span>, <span class="ident">HashMap</span>::<span class="ident">new</span>());
+        <span class="self">self</span>.<span class="ident">memos</span>
+            .<span class="ident">retain</span>(<span class="op">|</span><span class="kw">_</span>, (<span class="ident">liveness</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">liveness</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">Liveness</span>::<span class="ident">Live</span>);
+        <span class="self">self</span>.<span class="ident">memos</span>
+            .<span class="ident">values_mut</span>()
+            .<span class="ident">for_each</span>(<span class="op">|</span>(<span class="ident">liveness</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">liveness</span> <span class="op">=</span> <span class="ident">Liveness</span>::<span class="ident">Dead</span>);
     }
+}
+
+<span class="doccomment">/// Describes the outcome for a memoization value if a garbage collection were to occur when</span>
+<span class="doccomment">/// observed. During the run of a `Revision` any memoized values which are initialized or read are</span>
+<span class="doccomment">/// marked as `Live`. At the end of a `Revision`,</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Liveness</span> {
+    <span class="doccomment">/// The memoized value would be retained in a GC right now.</span>
+    <span class="ident">Live</span>,
+    <span class="doccomment">/// The memoized value would be dropped in a GC right now.</span>
+    <span class="ident">Dead</span>,
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> {
         <span class="kw">crate</span>::{<span class="ident">memo</span>::<span class="kw-2">*</span>, <span class="ident">Revision</span>},
-        <span class="ident">std</span>::<span class="ident">cell</span>::<span class="ident">Cell</span>,
+        <span class="ident">std</span>::{<span class="ident">cell</span>::<span class="ident">Cell</span>, <span class="ident">collections</span>::<span class="ident">HashSet</span>},
     };
+
+    <span class="kw">fn</span> <span class="ident">with_test_logs</span>(<span class="ident">test</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>()) {
+        <span class="ident">tracing</span>::<span class="ident">subscriber</span>::<span class="ident">with_default</span>(
+            <span class="ident">tracing_fmt</span>::<span class="ident">FmtSubscriber</span>::<span class="ident">builder</span>()
+                .<span class="ident">with_filter</span>(<span class="ident">tracing_fmt</span>::<span class="ident">filter</span>::<span class="ident">EnvFilter</span>::<span class="ident">new</span>(<span class="string">&quot;warn&quot;</span>))
+                .<span class="ident">finish</span>(),
+            <span class="op">||</span> {
+                <span class="ident">tracing</span>::<span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;logging init&#39;d&quot;</span>);
+                <span class="ident">test</span>();
+            },
+        );
+    }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">basic_memo</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">call_count</span> <span class="op">=</span> <span class="number">0u32</span>;
+        <span class="ident">with_test_logs</span>(<span class="op">||</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">call_count</span> <span class="op">=</span> <span class="number">0u32</span>;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">prev_revision</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">comp_skipped_count</span> <span class="op">=</span> <span class="number">0</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
-            <span class="kw">let</span> <span class="ident">revision</span> <span class="op">=</span> <span class="ident">Revision</span>::<span class="ident">current</span>();
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">prev_revision</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">comp_skipped_count</span> <span class="op">=</span> <span class="number">0</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
+                <span class="kw">let</span> <span class="ident">revision</span> <span class="op">=</span> <span class="ident">Revision</span>::<span class="ident">current</span>();
 
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pr</span>) <span class="op">=</span> <span class="ident">prev_revision</span> {
-                <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">revision</span>.<span class="number">0</span> <span class="op">&gt;</span> <span class="ident">pr</span>);
-            } <span class="kw">else</span> {
-                <span class="ident">comp_skipped_count</span> <span class="op">+=</span> <span class="number">1</span>;
-            }
-            <span class="ident">prev_revision</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">revision</span>.<span class="number">0</span>);
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">comp_skipped_count</span> <span class="op">&lt;=</span> <span class="number">1</span>);
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pr</span>) <span class="op">=</span> <span class="ident">prev_revision</span> {
+                    <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">revision</span>.<span class="number">0</span> <span class="op">&gt;</span> <span class="ident">pr</span>);
+                } <span class="kw">else</span> {
+                    <span class="ident">comp_skipped_count</span> <span class="op">+=</span> <span class="number">1</span>;
+                }
+                <span class="ident">prev_revision</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">revision</span>.<span class="number">0</span>);
+                <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">comp_skipped_count</span> <span class="op">&lt;=</span> <span class="number">1</span>);
 
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">revision</span>.<span class="number">0</span> <span class="op">&lt;=</span> <span class="number">5</span>);
-            <span class="kw">let</span> <span class="ident">current_call_count</span> <span class="op">=</span> <span class="macro">once</span><span class="macro">!</span>(<span class="op">||</span> {
-                <span class="ident">call_count</span> <span class="op">+=</span> <span class="number">1</span>;
-                <span class="ident">call_count</span>
+                <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">revision</span>.<span class="number">0</span> <span class="op">&lt;=</span> <span class="number">5</span>);
+                <span class="kw">let</span> <span class="ident">current_call_count</span> <span class="op">=</span> <span class="macro">once</span><span class="macro">!</span>(<span class="op">||</span> {
+                    <span class="ident">call_count</span> <span class="op">+=</span> <span class="number">1</span>;
+                    <span class="ident">call_count</span>
+                });
+
+                <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">current_call_count</span>, <span class="number">1</span>);
+                <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">call_count</span>, <span class="number">1</span>);
             });
 
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">current_call_count</span>, <span class="number">1</span>);
+            <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">5</span> {
+                <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">rt</span>.<span class="ident">revision</span>().<span class="number">0</span>, <span class="ident">i</span>);
+
+                <span class="ident">rt</span>.<span class="ident">run_once</span>();
+
+                <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">rt</span>.<span class="ident">revision</span>().<span class="number">0</span>, <span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>);
+            }
             <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">call_count</span>, <span class="number">1</span>);
-        });
+        })
+    }
 
-        <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">5</span> {
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">rt</span>.<span class="ident">revision</span>().<span class="number">0</span>, <span class="ident">i</span>);
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">id_in_loop</span>() {
+        <span class="ident">with_test_logs</span>(<span class="op">||</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ids</span> <span class="op">=</span> <span class="ident">HashSet</span>::<span class="ident">new</span>();
+            <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">10</span> {
+                <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(<span class="ident">ids</span>.<span class="ident">insert</span>(<span class="ident">topo</span>::<span class="ident">Id</span>::<span class="ident">current</span>()));
+            }
+            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">ids</span>.<span class="ident">len</span>(), <span class="number">10</span>);
 
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ids</span> <span class="op">=</span> <span class="ident">HashSet</span>::<span class="ident">new</span>();
+                <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">10</span> {
+                    <span class="macro">memo</span><span class="macro">!</span>(<span class="ident">i</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ids</span>.<span class="ident">insert</span>(<span class="ident">topo</span>::<span class="ident">Id</span>::<span class="ident">current</span>()));
+                }
+                <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">ids</span>.<span class="ident">len</span>(), <span class="number">10</span>);
+            });
             <span class="ident">rt</span>.<span class="ident">run_once</span>();
+        });
+    }
 
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">rt</span>.<span class="ident">revision</span>().<span class="number">0</span>, <span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>);
-        }
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">call_count</span>, <span class="number">1</span>);
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">memo_in_a_loop</span>() {
+        <span class="ident">with_test_logs</span>(<span class="op">||</span> {
+            <span class="kw">let</span> <span class="ident">num_iters</span> <span class="op">=</span> <span class="number">10</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counts</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[];
+                <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">num_iters</span> {
+                    <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(<span class="macro">once</span><span class="macro">!</span>(<span class="op">||</span> <span class="ident">counts</span>.<span class="ident">push</span>(<span class="ident">i</span>)));
+                }
+                <span class="ident">counts</span>
+            });
+
+            <span class="kw">let</span> <span class="ident">first_counts</span> <span class="op">=</span> <span class="ident">rt</span>.<span class="ident">run_once</span>();
+            <span class="macro">assert_eq</span><span class="macro">!</span>(
+                <span class="ident">first_counts</span>.<span class="ident">len</span>(),
+                <span class="ident">num_iters</span>,
+                <span class="string">&quot;each mutation must be called exactly once&quot;</span>
+            );
+
+            <span class="kw">let</span> <span class="ident">second_counts</span> <span class="op">=</span> <span class="ident">rt</span>.<span class="ident">run_once</span>();
+            <span class="macro">assert_eq</span><span class="macro">!</span>(
+                <span class="ident">second_counts</span>.<span class="ident">len</span>(),
+                <span class="number">0</span>,
+                <span class="string">&quot;each mutation was already called in the previous revision&quot;</span>
+            );
+        })
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">invalidation</span>() {
-        <span class="kw">let</span> <span class="ident">loop_ct</span> <span class="op">=</span> <span class="ident">Cell</span>::<span class="ident">new</span>(<span class="number">0</span>);
-        <span class="kw">let</span> <span class="ident">raw_exec</span> <span class="op">=</span> <span class="ident">Cell</span>::<span class="ident">new</span>(<span class="number">0</span>);
-        <span class="kw">let</span> <span class="ident">memo_exec</span> <span class="op">=</span> <span class="ident">Cell</span>::<span class="ident">new</span>(<span class="number">0</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
-            <span class="ident">raw_exec</span>.<span class="ident">set</span>(<span class="ident">raw_exec</span>.<span class="ident">get</span>() <span class="op">+</span> <span class="number">1</span>);
-            <span class="macro">memo</span><span class="macro">!</span>(<span class="ident">loop_ct</span>.<span class="ident">get</span>(), <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
-                <span class="ident">memo_exec</span>.<span class="ident">set</span>(<span class="ident">memo_exec</span>.<span class="ident">get</span>() <span class="op">+</span> <span class="number">1</span>);
+        <span class="ident">with_test_logs</span>(<span class="op">||</span> {
+            <span class="kw">let</span> <span class="ident">loop_ct</span> <span class="op">=</span> <span class="ident">Cell</span>::<span class="ident">new</span>(<span class="number">0</span>);
+            <span class="kw">let</span> <span class="ident">raw_exec</span> <span class="op">=</span> <span class="ident">Cell</span>::<span class="ident">new</span>(<span class="number">0</span>);
+            <span class="kw">let</span> <span class="ident">memo_exec</span> <span class="op">=</span> <span class="ident">Cell</span>::<span class="ident">new</span>(<span class="number">0</span>);
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
+                <span class="ident">raw_exec</span>.<span class="ident">set</span>(<span class="ident">raw_exec</span>.<span class="ident">get</span>() <span class="op">+</span> <span class="number">1</span>);
+                <span class="macro">memo</span><span class="macro">!</span>(<span class="ident">loop_ct</span>.<span class="ident">get</span>(), <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
+                    <span class="ident">memo_exec</span>.<span class="ident">set</span>(<span class="ident">memo_exec</span>.<span class="ident">get</span>() <span class="op">+</span> <span class="number">1</span>);
+                });
             });
-        });
 
-        <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">10</span> {
-            <span class="ident">loop_ct</span>.<span class="ident">set</span>(<span class="ident">i</span>);
+            <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">10</span> {
+                <span class="ident">loop_ct</span>.<span class="ident">set</span>(<span class="ident">i</span>);
 
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">memo_exec</span>.<span class="ident">get</span>(),
-                <span class="ident">i</span>,
-                <span class="string">&quot;memo block should execute exactly once per loop_ct value&quot;</span>
-            );
+                <span class="macro">assert_eq</span><span class="macro">!</span>(
+                    <span class="ident">memo_exec</span>.<span class="ident">get</span>(),
+                    <span class="ident">i</span>,
+                    <span class="string">&quot;memo block should execute exactly once per loop_ct value&quot;</span>
+                );
 
-            <span class="macro">assert_eq</span><span class="macro">!</span>(
-                <span class="ident">raw_exec</span>.<span class="ident">get</span>(),
-                <span class="ident">i</span> <span class="op">*</span> <span class="number">2</span>,
-                <span class="string">&quot;runtime&#39;s root block should run exactly twice per loop_ct value&quot;</span>
-            );
+                <span class="macro">assert_eq</span><span class="macro">!</span>(
+                    <span class="ident">raw_exec</span>.<span class="ident">get</span>(),
+                    <span class="ident">i</span> <span class="op">*</span> <span class="number">2</span>,
+                    <span class="string">&quot;runtime&#39;s root block should run exactly twice per loop_ct value&quot;</span>
+                );
 
-            <span class="ident">rt</span>.<span class="ident">run_once</span>();
-            <span class="ident">rt</span>.<span class="ident">run_once</span>();
-        }
+                <span class="ident">rt</span>.<span class="ident">run_once</span>();
+                <span class="ident">rt</span>.<span class="ident">run_once</span>();
+            }
+        })
     }
 }
 </pre></div>

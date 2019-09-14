@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Visibility",""]],"struct":[["Filter",""]]});
+initSidebarItems({"enum":[["Visibility",""]]});

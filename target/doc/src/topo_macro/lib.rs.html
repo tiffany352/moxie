@@ -135,7 +135,7 @@
 <span class="kw">use</span> {<span class="ident">proc_macro</span>::<span class="ident">TokenStream</span>, <span class="ident">syn</span>::<span class="ident">export</span>::<span class="ident">TokenStream2</span>};
 
 <span class="doccomment">/// Transforms a function declaration into a topological function invoked with macro syntax to</span>
-<span class="doccomment">/// *bind* its call tree&#39;s (sub)topology to the parent topology.</span>
+<span class="doccomment">/// attach its call tree&#39;s (sub)topology to the parent topology.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// A macro transformation is used to capture unique callsite information from the invoking</span>
 <span class="doccomment">/// function. In the current implementation, we synthesize a unique [`std::any::TypeId`] at each</span>
@@ -166,7 +166,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// TODO expand</span>
 <span class="attribute">#[<span class="ident">proc_macro_attribute</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bound</span>(<span class="ident">_attrs</span>: <span class="ident">TokenStream</span>, <span class="ident">input</span>: <span class="ident">TokenStream</span>) <span class="op">-&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">aware</span>(<span class="ident">_attrs</span>: <span class="ident">TokenStream</span>, <span class="ident">input</span>: <span class="ident">TokenStream</span>) <span class="op">-&gt;</span> <span class="ident">TokenStream</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">input_fn</span>: <span class="ident">syn</span>::<span class="ident">ItemFn</span> <span class="op">=</span> <span class="ident">syn</span>::<span class="macro">parse_macro_input</span><span class="macro">!</span>(<span class="ident">input</span>);
 
     <span class="kw">let</span> <span class="ident">tmp</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input_fn</span>.<span class="ident">attrs</span>, <span class="ident">Vec</span>::<span class="ident">new</span>());

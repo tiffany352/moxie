@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["TextInput",""]]});
+initSidebarItems({});

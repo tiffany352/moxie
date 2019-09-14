@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["MainSection",""]]});
+initSidebarItems({});

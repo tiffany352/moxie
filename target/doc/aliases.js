@@ -5,4 +5,3 @@ ALIASES["moxie_dom"] = {};
 ALIASES["todomvc_moxie"] = {};
 ALIASES["topo"] = {};
 ALIASES["topo_macro"] = {};
-ALIASES["wasm_pack"] = {};

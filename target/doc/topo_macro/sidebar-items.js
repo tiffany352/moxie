@@ -1,1 +1,1 @@
-initSidebarItems({"attr":[["bound","Transforms a function declaration into a topological function invoked with macro syntax to bind its call tree's (sub)topology to the parent topology."]]});
+initSidebarItems({"attr":[["aware","Transforms a function declaration into a topological function invoked with macro syntax to attach its call tree's (sub)topology to the parent topology."]]});

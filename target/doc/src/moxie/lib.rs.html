@@ -143,6 +143,38 @@
 <span id="143">143</span>
 <span id="144">144</span>
 <span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! moxie is a toolkit for efficiently constructing and incrementally updating trees, describing</span>
 <span class="doccomment">//! their structure and contents from the shape of a memoized function call graph.</span>
@@ -163,130 +195,162 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! TODO</span>
 
+<span class="attribute">#![<span class="ident">forbid</span>(<span class="ident">unsafe_code</span>)]</span>
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">clippy</span>::<span class="ident">all</span>, <span class="ident">intra_doc_link_resolution_failure</span>)]</span>
 <span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>)]</span>
 
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">mod</span> <span class="ident">memo</span>;
-<span class="kw">mod</span> <span class="ident">nodes</span>;
-<span class="kw">mod</span> <span class="ident">runtime</span>;
 <span class="kw">mod</span> <span class="ident">state</span>;
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">topo</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> {<span class="ident">memo</span>::<span class="kw-2">*</span>, <span class="ident">nodes</span>::<span class="kw-2">*</span>, <span class="ident">runtime</span>::<span class="kw-2">*</span>, <span class="ident">state</span>::<span class="kw-2">*</span>};
+<span class="kw">pub</span> <span class="kw">use</span> {<span class="ident">memo</span>::<span class="kw-2">*</span>, <span class="ident">state</span>::<span class="kw-2">*</span>};
 
-<span class="kw">use</span> {<span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Debug</span>, <span class="ident">tracing</span>::<span class="kw-2">*</span>};
+<span class="kw">use</span> {<span class="kw">crate</span>::<span class="ident">MemoStore</span>, <span class="ident">std</span>::<span class="ident">task</span>::<span class="ident">Waker</span>, <span class="ident">tracing</span>::<span class="kw-2">*</span>};
 
-<span class="doccomment">/// TODO explain a component...somehow</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Component</span>: <span class="ident">Debug</span> <span class="op">+</span> <span class="ident">Sized</span> {
-    <span class="doccomment">/// Defines the `Component` at a given point in time.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// TODO explain &quot;right now&quot; declaration</span>
-    <span class="doccomment">/// TODO explain memoization of this call</span>
-    <span class="doccomment">/// TODO explain show macro</span>
-    <span class="kw">fn</span> <span class="ident">contents</span>(<span class="self">self</span>);
-}
+<span class="doccomment">/// Revisions measure moxie&#39;s notion of time passing. Each [`Runtime`] increments its Revision</span>
+<span class="doccomment">/// on every iteration. [`crate::Commit`]s to state variables are annotated with the Revision</span>
+<span class="doccomment">/// during which they were made.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Default</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>, <span class="ident">Ord</span>, <span class="ident">PartialEq</span>, <span class="ident">PartialOrd</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Revision</span>(<span class="kw">pub</span> <span class="ident">u64</span>);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Component</span> <span class="kw">for</span> <span class="ident">I</span>
-<span class="kw">where</span>
-    <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">C</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Debug</span>,
-    <span class="ident">C</span>: <span class="ident">Component</span>,
-{
-    <span class="kw">fn</span> <span class="ident">contents</span>(<span class="self">self</span>) {
-        <span class="kw">for</span> <span class="ident">component</span> <span class="kw">in</span> <span class="self">self</span> {
-            <span class="macro">show</span><span class="macro">!</span>(<span class="ident">component</span>);
+<span class="kw">impl</span> <span class="ident">Revision</span> {
+    <span class="doccomment">/// Returns the current revision. Will return `Revision(0)` if called outside of a Runtime&#39;s</span>
+    <span class="doccomment">/// execution.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">current</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">r</span>) <span class="op">=</span> <span class="ident">topo</span>::<span class="ident">Env</span>::<span class="ident">get</span>::<span class="op">&lt;</span><span class="ident">Revision</span><span class="op">&gt;</span>() {
+            <span class="kw-2">*</span><span class="ident">r</span>
+        } <span class="kw">else</span> {
+            <span class="ident">Revision</span>::<span class="ident">default</span>()
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">bound</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">show_one</span>(<span class="ident">component</span>: <span class="kw">impl</span> <span class="ident">Component</span>) {
-    <span class="kw">let</span> <span class="ident">show_span</span> <span class="op">=</span> <span class="macro">once</span><span class="macro">!</span>(<span class="op">||</span> <span class="macro">trace_span</span><span class="macro">!</span>(<span class="string">&quot;show component&quot;</span>));
-    <span class="kw">let</span> <span class="ident">state_revision</span> <span class="op">=</span> <span class="macro">once</span><span class="macro">!</span>(<span class="ident">RevisionChain</span>::<span class="ident">new</span>);
-
-    <span class="kw">let</span> <span class="ident">_in_span</span> <span class="op">=</span> <span class="ident">show_span</span>.<span class="ident">enter</span>();
-    <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(
-        {
-            <span class="kw">let</span> <span class="ident">rev</span> <span class="op">=</span> <span class="ident">state_revision</span>.<span class="ident">current</span>();
-            <span class="ident">show_span</span>.<span class="ident">record</span>(<span class="string">&quot;rev&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">rev</span>);
-            <span class="macro">trace</span><span class="macro">!</span>({ <span class="ident">props</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">component</span> }, <span class="string">&quot;showing&quot;</span>);
-            <span class="ident">component</span>.<span class="ident">contents</span>();
-        },
-        <span class="macro">env</span><span class="macro">!</span> {
-            <span class="ident">RevisionChain</span> <span class="op">=&gt;</span> <span class="ident">state_revision</span>.<span class="ident">clone</span>(),
-        }
-    );
-}
-
-<span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">show</span> {
-    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">child</span>:<span class="ident">expr</span>),<span class="op">+</span>) <span class="op">=&gt;</span> {
-        $(<span class="macro">show_one</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">child</span>);)<span class="op">+</span>
-    };
-}
-
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Parent</span><span class="op">&lt;</span><span class="ident">Next</span>: <span class="ident">Component</span><span class="op">&gt;</span>: <span class="ident">Component</span> {
-    <span class="comment">// TODO can we express these automatically in terms of the Self&lt;T&gt; -&gt; Self&lt;SibList&lt;T, Next&gt;&gt; xform?</span>
-    <span class="kw">type</span> <span class="ident">Output</span>: <span class="ident">Component</span>;
-
-    <span class="kw">fn</span> <span class="ident">child</span>(<span class="self">self</span>, <span class="ident">next</span>: <span class="ident">Next</span>) <span class="op">-&gt;</span> <span class="self">Self</span>::<span class="ident">Output</span>;
-}
-
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sib_cons</span><span class="op">&lt;</span><span class="ident">Current</span>, <span class="ident">Next</span><span class="op">&gt;</span>(<span class="ident">curr</span>: <span class="ident">Current</span>, <span class="ident">next</span>: <span class="ident">Next</span>) <span class="op">-&gt;</span> <span class="ident">SibList</span><span class="op">&lt;</span><span class="ident">Current</span>, <span class="ident">Next</span><span class="op">&gt;</span> {
-    <span class="ident">SibList</span> { <span class="ident">curr</span>, <span class="ident">next</span> }
-}
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SibList</span><span class="op">&lt;</span><span class="ident">Current</span>, <span class="ident">Next</span><span class="op">&gt;</span> {
-    <span class="ident">curr</span>: <span class="ident">Current</span>,
-    <span class="ident">next</span>: <span class="ident">Next</span>,
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Current</span>, <span class="ident">Next</span><span class="op">&gt;</span> <span class="ident">Component</span> <span class="kw">for</span> <span class="ident">SibList</span><span class="op">&lt;</span><span class="ident">Current</span>, <span class="ident">Next</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">Current</span>: <span class="ident">Component</span>,
-    <span class="ident">Next</span>: <span class="ident">Component</span>,
-{
-    <span class="kw">fn</span> <span class="ident">contents</span>(<span class="self">self</span>) {
-        <span class="macro">show</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">curr</span>);
-        <span class="macro">show</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">next</span>);
-    }
-}
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Empty</span>;
-
-<span class="kw">impl</span> <span class="ident">Component</span> <span class="kw">for</span> <span class="ident">Empty</span> {
-    <span class="kw">fn</span> <span class="ident">contents</span>(<span class="self">self</span>) {}
-}
-
-<span class="doccomment">/// TODO find a better name. A wrapper for a closure which is called as if it were a child component, i.e. in its own topological point.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Clomp</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw">pub</span> <span class="ident">F</span>);
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span> <span class="ident">Clomp</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">F</span>: <span class="ident">FnOnce</span>(),
-{
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">op</span>: <span class="ident">F</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Clomp</span>(<span class="ident">op</span>)
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span> <span class="ident">Component</span> <span class="kw">for</span> <span class="ident">Clomp</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">F</span>: <span class="ident">FnOnce</span>(),
-{
-    <span class="kw">fn</span> <span class="ident">contents</span>(<span class="self">self</span>) {
-        (<span class="self">self</span>.<span class="number">0</span>)()
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">Clomp</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">Revision</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-&gt;</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="ident">f</span>.<span class="ident">write_fmt</span>(<span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;Clomp(TODO better output)&quot;</span>))
+        <span class="ident">f</span>.<span class="ident">write_fmt</span>(<span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;r{}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>))
+    }
+}
+
+<span class="doccomment">/// A `Runtime` is the entry point of the moxie runtime environment. On each invocation of</span>
+<span class="doccomment">/// `run_once`, it calls the root with which it was initialized. Typically this is invoked in a loop</span>
+<span class="doccomment">/// which sleeps until the provided waker is invoked, as is the case in the `Future` implementation.</span>
+<span class="doccomment">/// Usually root closure will cause some memoized side effect to the render environment in order to</span>
+<span class="doccomment">/// produce a view of the input data. A Runtime&#39;s root closure will also transitively establish</span>
+<span class="doccomment">/// event handlers, either via locally polled `Future`s or via the containing environment&#39;s</span>
+<span class="doccomment">/// callback or event mechanisms.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// While the Runtime may iterate very frequently (potentially more than once for any given output</span>
+<span class="doccomment">/// frame), we use [topological memoization](crate::memo) to minimize the code run each time.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// See the documentation for [`Runtime::run_once`] for details on the core loop body.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ## Minimal Example</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// let mut rt = moxie::Runtime::new(|| {});</span>
+<span class="doccomment">/// assert_eq!(rt.revision().0, 0);</span>
+<span class="doccomment">/// for i in 1..10 {</span>
+<span class="doccomment">///     rt.run_once();</span>
+<span class="doccomment">///     assert_eq!(rt.revision(), moxie::Revision(i));</span>
+<span class="doccomment">/// }</span>
+<span class="doccomment">/// ```</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Runtime</span><span class="op">&lt;</span><span class="ident">Root</span>, <span class="ident">Out</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">Root</span>: <span class="ident">FnMut</span>() <span class="op">-&gt;</span> <span class="ident">Out</span>,
+{
+    <span class="ident">revision</span>: <span class="ident">Revision</span>,
+    <span class="ident">store</span>: <span class="ident">MemoStore</span>,
+    <span class="ident">root</span>: <span class="ident">Root</span>,
+    <span class="ident">wk</span>: <span class="ident">Waker</span>,
+    <span class="ident">span</span>: <span class="ident">Span</span>,
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Root</span>, <span class="ident">Out</span><span class="op">&gt;</span> <span class="ident">Runtime</span><span class="op">&lt;</span><span class="ident">Root</span>, <span class="ident">Out</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">Root</span>: <span class="ident">FnMut</span>() <span class="op">-&gt;</span> <span class="ident">Out</span>,
+{
+    <span class="doccomment">/// Construct a new Runtime at revision 0 and blank storage.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">root</span>: <span class="ident">Root</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="macro">trace_span</span><span class="macro">!</span>(<span class="string">&quot;runtime&quot;</span>, <span class="ident">rev</span> <span class="op">=</span> <span class="number">0</span>);
+        <span class="self">Self</span> {
+            <span class="ident">span</span>,
+            <span class="ident">revision</span>: <span class="ident">Revision</span>(<span class="number">0</span>),
+            <span class="ident">store</span>: <span class="ident">MemoStore</span>::<span class="ident">default</span>(),
+            <span class="ident">root</span>,
+            <span class="ident">wk</span>: <span class="ident">futures</span>::<span class="ident">task</span>::<span class="ident">noop_waker</span>(),
+        }
+    }
+
+    <span class="doccomment">/// The current revision of the runtime.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">revision</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Revision</span> {
+        <span class="self">self</span>.<span class="ident">revision</span>
+    }
+
+    <span class="doccomment">/// Run a single iteration of the root closure with access to the [`topo::Env`] provided by the</span>
+    <span class="doccomment">/// [`Runtime`] . Increments the [`Revision`] counter of this [`Runtime`] by one.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run_once</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Out</span> {
+        <span class="self">self</span>.<span class="ident">revision</span>.<span class="number">0</span> <span class="op">+=</span> <span class="number">1</span>;
+        <span class="self">self</span>.<span class="ident">span</span>.<span class="ident">record</span>(<span class="string">&quot;rev&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">revision</span>.<span class="number">0</span>);
+        <span class="kw">let</span> <span class="ident">_entered</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">span</span>.<span class="ident">enter</span>();
+
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">topo</span>::<span class="macro">root</span><span class="macro">!</span>(
+            (<span class="self">self</span>.<span class="ident">root</span>)(),
+            <span class="macro">env</span><span class="macro">!</span> {
+                <span class="ident">MemoStore</span> <span class="op">=&gt;</span> <span class="self">self</span>.<span class="ident">store</span>.<span class="ident">clone</span>(),
+                <span class="ident">Revision</span> <span class="op">=&gt;</span> <span class="self">self</span>.<span class="ident">revision</span>,
+                <span class="ident">RunLoopWaker</span> <span class="op">=&gt;</span> <span class="ident">RunLoopWaker</span>(<span class="self">self</span>.<span class="ident">wk</span>.<span class="ident">clone</span>()),
+            }
+        );
+        <span class="self">self</span>.<span class="ident">store</span>.<span class="ident">gc</span>();
+        <span class="ident">ret</span>
+    }
+
+    <span class="doccomment">/// Sets the [`std::task::Waker`] which will be called when state variables receive commits. By</span>
+    <span class="doccomment">/// default the runtime has a</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_state_change_waker</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">wk</span>: <span class="ident">Waker</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">wk</span> <span class="op">=</span> <span class="ident">wk</span>;
+        <span class="self">self</span>
+    }
+}
+
+<span class="doccomment">/// Responsible for waking the Runtime task. Because the topo environment is namespaced by type,</span>
+<span class="doccomment">/// we create a newtype here so that other crates don&#39;t accidentally cause strange behavior by</span>
+<span class="doccomment">/// overriding our access to it.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">RunLoopWaker</span>(<span class="ident">std</span>::<span class="ident">task</span>::<span class="ident">Waker</span>);
+
+<span class="kw">impl</span> <span class="ident">RunLoopWaker</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">wake</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">wake_by_ref</span>();
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">tests</span> {
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">propagating_env_to_runtime</span>() {
+        <span class="kw">let</span> <span class="ident">first_byte</span> <span class="op">=</span> <span class="number">0u8</span>;
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">runtime</span> <span class="op">=</span> <span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
+            <span class="kw">let</span> <span class="ident">from_env</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">topo</span>::<span class="ident">Env</span>::<span class="ident">expect</span>();
+            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">from_env</span>, <span class="ident">first_byte</span>);
+        });
+
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">topo</span>::<span class="ident">Env</span>::<span class="ident">get</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>().<span class="ident">is_none</span>());
+        <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(
+            {
+                <span class="ident">runtime</span>.<span class="ident">run_once</span>();
+            },
+            <span class="macro">env</span><span class="macro">!</span> {
+                <span class="ident">u8</span> <span class="op">=&gt;</span> <span class="ident">first_byte</span>,
+            }
+        );
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">topo</span>::<span class="ident">Env</span>::<span class="ident">get</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>().<span class="ident">is_none</span>());
     }
 }
 </pre></div>
