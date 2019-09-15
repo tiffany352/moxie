@@ -1,10 +1,6 @@
 
 let wasm;
 
-function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(17)(arg0, arg1);
-}
-
 const heap = new Array(32);
 
 heap.fill(undefined);
@@ -21,8 +17,11 @@ function addHeapObject(obj) {
     heap[idx] = obj;
     return idx;
 }
-function __wbg_elem_binding1(arg0, arg1, arg2) {
+function __wbg_elem_binding0(arg0, arg1, arg2) {
     wasm.__wbg_function_table.get(43)(arg0, arg1, addHeapObject(arg2));
+}
+function __wbg_elem_binding1(arg0, arg1) {
+    wasm.__wbg_function_table.get(17)(arg0, arg1);
 }
 /**
 */
@@ -446,14 +445,14 @@ function init(module) {
         const ret = getObject(arg0).body;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper92 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper82 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
-        const real = () => {
+        const real = (arg0) => {
             state.cnt++;
             const a = state.a;
             state.a = 0;
             try {
-                return __wbg_elem_binding0(a, state.b, );
+                return __wbg_elem_binding0(a, state.b, arg0);
             } finally {
                 if (--state.cnt === 0) wasm.__wbg_function_table.get(18)(a, state.b);
                 else state.a = a;
@@ -464,14 +463,14 @@ function init(module) {
         const ret = real;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper82 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper92 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
-        const real = (arg0) => {
+        const real = () => {
             state.cnt++;
             const a = state.a;
             state.a = 0;
             try {
-                return __wbg_elem_binding1(a, state.b, arg0);
+                return __wbg_elem_binding1(a, state.b, );
             } finally {
                 if (--state.cnt === 0) wasm.__wbg_function_table.get(18)(a, state.b);
                 else state.a = a;
