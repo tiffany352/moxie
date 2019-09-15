@@ -1,4 +1,9 @@
-on: push
+on:
+  push:
+    branches:
+      - '*'
+      - '!staging.tmp'
+      - '!trying.tmp'
 jobs:
   core:
     strategy:
