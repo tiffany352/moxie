@@ -12,15 +12,13 @@ struct Options {
     verbose: bool,
 }
 
-fn init_logging(verbose: bool) {
-    let level: LevelFilter = if verbose { "debug" } else { "info" }.parse().unwrap();
+fn main() {
+    let options = Options::from_args();
+    let level: LevelFilter = if options.verbose { "debug" } else { "info" }
+        .parse()
+        .unwrap();
     let subscriber = Subscriber::builder().with_max_level(level).finish();
     tracing::subscriber::set_global_default(subscriber)
         .expect("couldn't set global default subscriber");
-}
-
-fn main() {
-    let options = Options::from_args();
-    init_logging(options.verbose);
     info!("Hello, world!");
 }
