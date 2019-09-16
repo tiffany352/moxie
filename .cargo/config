@@ -85,3 +85,11 @@ clippy-ofl = "clippy --manifest-path ofl/Cargo.toml --all"
 fmt-ofl = "fmt -- ofl/src/main.rs"
 test-ofl = "test --manifest-path ofl/Cargo.toml --all"
 docs-ofl = "doc --manifest-path ofl/Cargo.toml --all --no-deps"
+
+
+####################################################################################################
+# tow
+
+tow = "run --manifest-path tow/Cargo.toml --"
+
+fmt-tow = "fmt -- tow/src/main.rs"

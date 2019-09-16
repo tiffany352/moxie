@@ -1,0 +1,13 @@
+[package]
+name = "tow"
+version = "0.1.0-pre"
+authors = ["Adam Perry <adam.n.perry@gmail.com>"]
+edition = "2018"
+license = "MIT/Apache-2.0"
+repository = "https://github.com/anp/moxie/tree/master/tow"
+
+[dependencies]
+starlark = "0.2"
+structopt = "0.3"
+tracing = "^0.1.9"
+tracing-subscriber = "^0.1.2"
