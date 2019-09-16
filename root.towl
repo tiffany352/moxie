@@ -1,4 +1,5 @@
-def cargo_workspace(root_path = "Cargo.toml"):
-    return
+def cargo_workspace(root_path="Cargo.toml"):
+    return "hello world"
 
-moxie_workspace = cargo_workspace()
+
+cargo_workspace()

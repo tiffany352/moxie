@@ -1,8 +1,11 @@
 //! An experimental starlark-based task tool for extending Cargo projects.
 
 use {
-    failure::Error,
-    std::path::PathBuf,
+    failure::{bail, Error},
+    std::{
+        path::PathBuf,
+        sync::{Arc, Mutex},
+    },
     structopt::StructOpt,
     tracing::*,
     tracing_subscriber::{filter::LevelFilter, fmt::Subscriber},
@@ -36,9 +39,38 @@ impl Options {
             Some(r) => r,
             None => find_root_towl()?,
         };
+        let root_path = root_towl.display();
 
         debug!("initialized");
-        info!({ root_towl = %root_towl.display() }, "starting");
+        info!({ %root_path }, "starting");
+
+        let code_map = Arc::new(Mutex::new(codemap::CodeMap::new()));
+        let mut env = starlark::environment::Environment::new("root");
+        let result = starlark::eval::simple::eval_file(
+            &code_map,
+            root_towl.to_str().unwrap(),
+            false,
+            &mut env,
+        );
+
+        debug!({ ?env }, "execution terminated");
+        let returned = match result {
+            Err(why) => {
+                use codemap_diagnostic::{ColorConfig, Emitter};
+                let cm = code_map.lock().unwrap();
+                let mut emitter = Emitter::stderr(ColorConfig::Auto, Some(&*cm));
+                error!("failed to evaluate {}:", root_path);
+                emitter.emit(&[why]);
+                bail!("execution failure");
+            }
+            Ok(r) => r,
+        };
+
+        info!({ ?returned }, "evaluated {}", root_path);
+
+        for outcome in self.outcomes {
+            // let val =
+        }
 
         Ok(())
     }

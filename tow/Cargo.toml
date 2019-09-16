@@ -5,8 +5,11 @@ authors = ["Adam Perry <adam.n.perry@gmail.com>"]
 edition = "2018"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/anp/moxie/tree/master/tow"
+description = "bringing things along for the ride that don't fit in cargo"
 
 [dependencies]
+codemap = "^0.1.1"
+codemap-diagnostic = "^0.1.0"
 failure = "0.1"
 starlark = "0.2"
 structopt = "0.3"
