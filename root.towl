@@ -1,0 +1,4 @@
+def cargo_workspace(root_path = "Cargo.toml"):
+    return
+
+moxie_workspace = cargo_workspace()
