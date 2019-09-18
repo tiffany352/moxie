@@ -296,6 +296,7 @@
 <span class="doccomment">/// Root a state [`Var`] at this callsite, returning an up-to-date [`Commit`] of its value and</span>
 <span class="doccomment">/// a unique [`Key`] which can be used to commit new values to the variable.</span>
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">from_env</span>(<span class="ident">waker</span>: <span class="ident">RunLoopWaker</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_state</span><span class="op">&lt;</span><span class="ident">Arg</span>, <span class="ident">Init</span>, <span class="ident">Output</span><span class="op">&gt;</span>(<span class="ident">arg</span>: <span class="ident">Arg</span>, <span class="ident">initializer</span>: <span class="ident">Init</span>) <span class="op">-&gt;</span> <span class="ident">Key</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">Arg</span>: <span class="ident">PartialEq</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
@@ -304,7 +305,6 @@
 {
     <span class="kw">let</span> <span class="ident">var</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Var</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">&gt;&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">memo</span><span class="macro">!</span>(<span class="ident">arg</span>, <span class="op">|</span><span class="ident">a</span><span class="op">|</span> {
         <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;init var&quot;</span>);
-        <span class="kw">let</span> <span class="ident">waker</span> <span class="op">=</span> <span class="ident">topo</span>::<span class="ident">Env</span>::<span class="ident">expect</span>::<span class="op">&lt;</span><span class="ident">RunLoopWaker</span><span class="op">&gt;</span>().<span class="ident">to_owned</span>();
         <span class="kw">let</span> <span class="ident">var</span> <span class="op">=</span> <span class="ident">Var</span> {
             <span class="ident">point</span>: <span class="ident">topo</span>::<span class="ident">Id</span>::<span class="ident">current</span>(),
             <span class="ident">current</span>: <span class="ident">Commit</span> {
@@ -312,7 +312,7 @@
                 <span class="ident">inner</span>: <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="ident">initializer</span>(<span class="ident">a</span>)),
             },
             <span class="ident">pending</span>: <span class="prelude-val">None</span>,
-            <span class="ident">waker</span>,
+            <span class="ident">waker</span>: <span class="ident">waker</span>.<span class="ident">to_owned</span>(),
         };
 
         <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="ident">Mutex</span>::<span class="ident">new</span>(<span class="ident">var</span>))

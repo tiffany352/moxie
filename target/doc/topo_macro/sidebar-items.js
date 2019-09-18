@@ -1,1 +1,1 @@
-initSidebarItems({"attr":[["aware","Transforms a function declaration into a topological function invoked with macro syntax to attach its call tree's (sub)topology to the parent topology."]]});
+initSidebarItems({"attr":[["aware","Transforms a function declaration into a topological function invoked with macro syntax to attach its call tree's (sub)topology to the parent topology."],["from_env","Defines required [topo::Env] values for a function. Binds the provided types as if references to them were implicit function arguments."]]});
