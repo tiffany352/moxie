@@ -2,7 +2,8 @@
 
 # moxie
 
-![Crates.io](https://img.shields.io/crates/l/moxie.svg)
+[![crates.io](https://img.shields.io/crates/l/moxie.svg)](https://crates.io/crates/moxie)
+[![bors](https://bors.tech/images/badge_small.svg)](https://app.bors.tech/repositories/20478)
 
 ## Hands On
 
