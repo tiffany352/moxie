@@ -2,10 +2,16 @@
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">memo_with</span> {
     <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span> <span class="op">=&gt;</span> { ... };
 }</pre></div>
-</div><div class='docblock'><p>Memoizes the provided function, storing the intermediate <code>Stored</code> value in memoization storage
-and calling <code>with</code> with a reference to it, skipping the initialization on subsequent executions.
-Returns whatever <code>with</code> returns.</p>
-<p>Marks the memoized value as <code>Live</code> in the current <code>Revision</code>.</p>
+</div><div class='docblock'><p>Memoizes the provided function, caching the intermediate <code>Stored</code> value in memoization storage
+and only re-initializing it if <code>Arg</code> has changed since the cached value was created. Regardless
+of prior cached results, <code>with</code> is then called in to produce a return value.</p>
+<p>Marks the memoized value as <code>Live</code> in the current <code>Revision</code>, preventing the value from being
+garbage collected during at the end of the current <code>Revision</code>.</p>
+<p>If a previous value was cached for this callsite but the argument has changed and it must be
+re-initialized, the previous value will be dropped before the new one is initialized.</p>
+<p>It is currently possible to nest calls to <code>memo_with</code> and other functions in this module, but
+the values they store won't be correctly retained across <code>Revision</code>s until we track
+dependency information. As a result, it's not recommended to nest calls to <code>memo_with!</code>.</p>
 <h1 id="signature" class="section-header"><a href="#signature">Signature</a></h1>
 <pre><code class="language-text">fn memo_with&lt;Arg, Stored, Ret&gt;(
     arg: Arg,

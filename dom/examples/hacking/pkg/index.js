@@ -22,7 +22,7 @@ function addHeapObject(obj) {
     return idx;
 }
 function __wbg_elem_binding1(arg0, arg1, arg2) {
-    wasm.__wbg_function_table.get(41)(arg0, arg1, addHeapObject(arg2));
+    wasm.__wbg_function_table.get(43)(arg0, arg1, addHeapObject(arg2));
 }
 /**
 */
@@ -446,7 +446,7 @@ function init(module) {
         const ret = getObject(arg0).body;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper92 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper93 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -464,7 +464,7 @@ function init(module) {
         const ret = real;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper83 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper81 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = (arg0) => {
             state.cnt++;

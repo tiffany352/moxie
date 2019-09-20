@@ -673,23 +673,35 @@
 <span id="673">673</span>
 <span id="674">674</span>
 <span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">forbid</span>(<span class="ident">unsafe_code</span>)]</span>
-<span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>, <span class="ident">intra_doc_link_resolution_failure</span>)]</span>
+<span class="attribute">#![<span class="ident">deny</span>(<span class="ident">clippy</span>::<span class="ident">all</span>, <span class="ident">missing_docs</span>, <span class="ident">intra_doc_link_resolution_failure</span>)]</span>
 
-<span class="doccomment">//! `topo` provides tools for describing trees based on their runtime callgraph. Because normal</span>
-<span class="doccomment">//! synchronous control flow has a tree(ish)-shaped callgraph, this can be quite natural.</span>
+<span class="doccomment">//! `topo` creates a hierarchy of scoped, nested [environments][topo::Env] whose shape matches the</span>
+<span class="doccomment">//! function callgraph. These environments store singletons indexed by their type, and references to</span>
+<span class="doccomment">//! environmental values are available only to an enclosed call scope. When a `#![topo::aware]`</span>
+<span class="doccomment">//! function is called, its parent environment is cheaply propagated along with any additional</span>
+<span class="doccomment">//! values added at appropriate callsites.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! Topologically-aware functions run within a context unique to the path in the runtime call</span>
-<span class="doccomment">//! graph of other topological functions preceding the current activation record.</span>
+<span class="doccomment">//! Each environment in this hierarchy has a unique and deterministic [`topo::Id`] describing that</span>
+<span class="doccomment">//! environment and the path taken to arrive at its stack frame. These identifiers are derived from</span>
+<span class="doccomment">//! the path taken through the callgraph to the current location, and are stable across repeated</span>
+<span class="doccomment">//! invocations of the same execution paths.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! By running the same topologically-aware functions in a loop, we can observe changes to the</span>
-<span class="doccomment">//! structure over time.</span>
+<span class="doccomment">//! structure over time. The [moxie](https://docs.rs/moxie) crate uses these identifiers and</span>
+<span class="doccomment">//! environments to create persistent trees for rendering human interfaces.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Making functions aware of the call topology</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Defining a topological function results in a macro definition for binding the</span>
-<span class="doccomment">//! function to each callsite where it is invoked.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Define a topologically-aware function with the `topo::aware` attribute:</span>
+<span class="doccomment">//! function to each callsite where it is invoked. Define a topologically-aware function with the</span>
+<span class="doccomment">//! `topo::aware` attribute:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! #[topo::aware]</span>
@@ -713,19 +725,9 @@
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Because topological functions must be sensitive to the location at which they&#39;re invoked and</span>
-<span class="doccomment">//! aware of their parent, we transform the function definition into a macro so we can link</span>
-<span class="doccomment">//! the two activation records inside macro expansion. See the docs for the attribute for more</span>
-<span class="doccomment">//! detail and further discussion of the tradeoffs.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! TODO include diagram of topology</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! TODO discuss creation of tree from &quot;abstract stack frames&quot; represented by topological</span>
-<span class="doccomment">//! invocations</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! TODO discuss propagating environment values down the topological call tree</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! TODO show example of a rendering loop</span>
-<span class="doccomment">//!</span>
+<span class="doccomment">//! aware of their parent, we transform the function definition into a macro to track the source</span>
+<span class="doccomment">//! location at which it is called. Future language features may make it possible to call topo-aware</span>
+<span class="doccomment">//! functions without any special syntax.</span>
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">topo_macro</span>::{<span class="ident">aware</span>, <span class="ident">from_env</span>};
 
@@ -928,13 +930,21 @@
     }};
 }
 
-<span class="doccomment">/// Identifies an activation record in the call topology. This is implemented approximately similar</span>
-<span class="doccomment">/// to the [hash cons][cons] of preceding topological function invocations&#39; `Id`s.</span>
+<span class="doccomment">/// Identifies an activation record in the current call topology.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// TODO explore analogies to instruction and stack pointers?</span>
-<span class="doccomment">/// TODO explore more efficient implementations by piggybacking on those?</span>
+<span class="doccomment">/// The `Id` for the execution of a stack frame is the combined product of:</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// [cons]: https://en.wikipedia.org/wiki/Hash_consing</span>
+<span class="doccomment">/// * a callsite: lexical source location at which the topologically-aware function was invoked</span>
+<span class="doccomment">/// * parent `Id`: the identifier which was active when entering the current topo-aware function</span>
+<span class="doccomment">/// * a &quot;slot&quot;: runtime value indicating the call&#39;s &quot;logical index&quot; within the parent call</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// By default, the slot used is a count of the number of times that particular callsite has been</span>
+<span class="doccomment">/// executed within the parent `Id`&#39;s enclosing scope. This means that when creating an `Id` in a</span>
+<span class="doccomment">/// loop the identifier will be unique for each &quot;index&quot; of the loop iteration and will be stable if</span>
+<span class="doccomment">/// the same loop is invoked again. Changing the value used for the slot allows us to have stable</span>
+<span class="doccomment">/// `Id`s across multiple executions when iterating over elements of a collection that itself has</span>
+<span class="doccomment">/// unstable iteration order.</span>
+
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Id</span>(<span class="ident">u64</span>);
 

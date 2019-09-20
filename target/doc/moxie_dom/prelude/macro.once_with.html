@@ -2,7 +2,10 @@
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">once_with</span> {
     ( $ ( $ <span class="ident">arg</span> : <span class="ident">expr</span> ) , <span class="op">*</span> ) <span class="op">=&gt;</span> { ... };
 }</pre></div>
-</div><div class='docblock'><p>Memoizes <code>expr</code> once at the callsite. Runs <code>with</code> on every iteration.</p>
+</div><div class='docblock'><p>Memoizes <code>expr</code> once at the callsite. Runs <code>with</code> on every iteration.
+Runs the provided expression once per [<code>topo::Id</code>]. The provided value will never be
+reinitialized and will be passed to <code>with</code> on every call unless the value is dropped from
+storage and reinitialized in a later <code>Revision</code>.</p>
 <h1 id="signature" class="section-header"><a href="#signature">Signature</a></h1>
 <pre><code class="language-text">fn once_with&lt;Stored, Ret&gt;(expr: impl FnOnce() -&gt; Stored, with: impl FnOnce(&amp;Stored) -&gt; Ret) -&gt; Ret
 where

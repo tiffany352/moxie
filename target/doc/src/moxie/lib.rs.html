@@ -1,357 +1,141 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../moxie/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
-<span id="100">100</span>
-<span id="101">101</span>
-<span id="102">102</span>
-<span id="103">103</span>
-<span id="104">104</span>
-<span id="105">105</span>
-<span id="106">106</span>
-<span id="107">107</span>
-<span id="108">108</span>
-<span id="109">109</span>
-<span id="110">110</span>
-<span id="111">111</span>
-<span id="112">112</span>
-<span id="113">113</span>
-<span id="114">114</span>
-<span id="115">115</span>
-<span id="116">116</span>
-<span id="117">117</span>
-<span id="118">118</span>
-<span id="119">119</span>
-<span id="120">120</span>
-<span id="121">121</span>
-<span id="122">122</span>
-<span id="123">123</span>
-<span id="124">124</span>
-<span id="125">125</span>
-<span id="126">126</span>
-<span id="127">127</span>
-<span id="128">128</span>
-<span id="129">129</span>
-<span id="130">130</span>
-<span id="131">131</span>
-<span id="132">132</span>
-<span id="133">133</span>
-<span id="134">134</span>
-<span id="135">135</span>
-<span id="136">136</span>
-<span id="137">137</span>
-<span id="138">138</span>
-<span id="139">139</span>
-<span id="140">140</span>
-<span id="141">141</span>
-<span id="142">142</span>
-<span id="143">143</span>
-<span id="144">144</span>
-<span id="145">145</span>
-<span id="146">146</span>
-<span id="147">147</span>
-<span id="148">148</span>
-<span id="149">149</span>
-<span id="150">150</span>
-<span id="151">151</span>
-<span id="152">152</span>
-<span id="153">153</span>
-<span id="154">154</span>
-<span id="155">155</span>
-<span id="156">156</span>
-<span id="157">157</span>
-<span id="158">158</span>
-<span id="159">159</span>
-<span id="160">160</span>
-<span id="161">161</span>
-<span id="162">162</span>
-<span id="163">163</span>
-<span id="164">164</span>
-<span id="165">165</span>
-<span id="166">166</span>
-<span id="167">167</span>
-<span id="168">168</span>
-<span id="169">169</span>
-<span id="170">170</span>
-<span id="171">171</span>
-<span id="172">172</span>
-<span id="173">173</span>
-<span id="174">174</span>
-<span id="175">175</span>
-<span id="176">176</span>
-<span id="177">177</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../moxie/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1"> 1</span>
+<span id="2"> 2</span>
+<span id="3"> 3</span>
+<span id="4"> 4</span>
+<span id="5"> 5</span>
+<span id="6"> 6</span>
+<span id="7"> 7</span>
+<span id="8"> 8</span>
+<span id="9"> 9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="doccomment">//! moxie is a toolkit for efficiently constructing and incrementally updating trees, describing</span>
-<span class="doccomment">//! their structure and contents from the shape of a memoized function call graph.</span>
+<span class="doccomment">//! moxie aims to empower everyone to build reliable and efficient human interfaces. This crate</span>
+<span class="doccomment">//! implements a lightweight &amp; platform-agnostic UI runtime which powers a declarative style for</span>
+<span class="doccomment">//! creating interfaces and attempts to minimize latency and general overhead.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! TODO example of a JSON tree, or graphviz, or something</span>
+<span class="doccomment">//! # Declarative style</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! TODO diagram of tree transition over time</span>
+<span class="doccomment">//! TODO &quot;imperative but idempotent&quot;</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! &quot;describe the UI *right now*&quot;</span>
+<span class="doccomment">//! partition the render space using function calls</span>
+<span class="doccomment">//! while managing persistent stateful elements</span>
+<span class="doccomment">//! with minimal incremental updates</span>
+<span class="doccomment">//! in order to achieve minimal latency and consistent responsiveness</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Memoization</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! TODO</span>
+<span class="doccomment">//! Memoization is the core tool which moxie provides to store data across `Revision`s and to</span>
+<span class="doccomment">//! minimize the incremental work performed when an update triggers the next `Revision`. Calls to</span>
+<span class="doccomment">//! the memo_\* topological functions will perform memoization specific to the current position</span>
+<span class="doccomment">//! within the function call topology, as other topologically-aware functions do.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! During [`run_once`] the memoization storage is an [environment value](topo::Env). Memoization</span>
+<span class="doccomment">//! calls write to this storage to store results. At the end of [run_once], this storage is</span>
+<span class="doccomment">//! garbage-collected, dropping values which were not referenced, marking them as live.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Memoized values are dropped in a deterministic manner when replaced or no longer referenced,</span>
+<span class="doccomment">//! modeling side-effectful lifecycle. Storing a type whose liveness represents the effect being</span>
+<span class="doccomment">//! &quot;active&quot; allows us to perform the effect when creating the stored value and to undo the effect</span>
+<span class="doccomment">//! when the stored value is `Drop`ped.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Initializing a memoized value at a particular callsite offers a simple API for incremental</span>
+<span class="doccomment">//! computations. Further, placing mutations in the initializer for a memo variable offers a path</span>
+<span class="doccomment">//! to minimizing the mutations or other side effects performed while describing the interface.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # State</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! TODO explain update lifecycle, pending values, commit/xact</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Async Tasks &amp; Actors</span>
-<span class="doccomment">//!</span>
 <span class="doccomment">//! TODO</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # UI Runtime</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! A UI runtime is responsible for maintaining consistency between a program&#39;s desired output and</span>
+<span class="doccomment">//! the rendered output over time. The desired output is expected to change over time as a result</span>
+<span class="doccomment">//! of events from the &quot;outside world.&quot; This might be due to user input or events caused by</span>
+<span class="doccomment">//! asynchronous tasks requested by a user.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The rendered output is usually modelled or expressed in terms of a visual or semantic hierarchy,</span>
+<span class="doccomment">//! or a tree. The relationships between elements in the tree partition the space in which the</span>
+<span class="doccomment">//! elements are rendered, subdividing it among their children. These relationships may or may</span>
+<span class="doccomment">//! not be concretely encoded within data structures or they may purely be the result of some side</span>
+<span class="doccomment">//! effects which occur in a particular order (e.g. mutating a display list for a GPU).</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This process of performing the tasks to render the output is usually done in a loop, iterating</span>
+<span class="doccomment">//! either once per fixed interval (e.g. 60 frames per second or every 16.67 milliseconds) or when</span>
+<span class="doccomment">//! activated by the occurrence of events.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [run_once]: crate::embed::Runtime::run_once</span>
+<span class="doccomment">//! [topo]: https://docs.rs/topo</span>
 
 <span class="attribute">#![<span class="ident">forbid</span>(<span class="ident">unsafe_code</span>)]</span>
-<span class="attribute">#![<span class="ident">deny</span>(<span class="ident">clippy</span>::<span class="ident">all</span>, <span class="ident">intra_doc_link_resolution_failure</span>)]</span>
-<span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#![<span class="ident">deny</span>(<span class="ident">clippy</span>::<span class="ident">all</span>, <span class="ident">intra_doc_link_resolution_failure</span>, <span class="ident">missing_docs</span>)]</span>
 
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">embed</span>;
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">mod</span> <span class="ident">memo</span>;
 <span class="kw">mod</span> <span class="ident">state</span>;
 
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">topo</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> {<span class="ident">memo</span>::<span class="kw-2">*</span>, <span class="ident">state</span>::<span class="kw-2">*</span>};
-
-<span class="kw">use</span> {<span class="kw">crate</span>::<span class="ident">MemoStore</span>, <span class="ident">std</span>::<span class="ident">task</span>::<span class="ident">Waker</span>, <span class="ident">tracing</span>::<span class="kw-2">*</span>};
-
-<span class="doccomment">/// Revisions measure moxie&#39;s notion of time passing. Each [`Runtime`] increments its Revision</span>
-<span class="doccomment">/// on every iteration. [`crate::Commit`]s to state variables are annotated with the Revision</span>
-<span class="doccomment">/// during which they were made.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Default</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>, <span class="ident">Ord</span>, <span class="ident">PartialEq</span>, <span class="ident">PartialOrd</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Revision</span>(<span class="kw">pub</span> <span class="ident">u64</span>);
-
-<span class="kw">impl</span> <span class="ident">Revision</span> {
-    <span class="doccomment">/// Returns the current revision. Will return `Revision(0)` if called outside of a Runtime&#39;s</span>
-    <span class="doccomment">/// execution.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">current</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">r</span>) <span class="op">=</span> <span class="ident">topo</span>::<span class="ident">Env</span>::<span class="ident">get</span>::<span class="op">&lt;</span><span class="ident">Revision</span><span class="op">&gt;</span>() {
-            <span class="kw-2">*</span><span class="ident">r</span>
-        } <span class="kw">else</span> {
-            <span class="ident">Revision</span>::<span class="ident">default</span>()
-        }
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">Revision</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-&gt;</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="ident">f</span>.<span class="ident">write_fmt</span>(<span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;r{}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>))
-    }
-}
-
-<span class="doccomment">/// A `Runtime` is the entry point of the moxie runtime environment. On each invocation of</span>
-<span class="doccomment">/// `run_once`, it calls the root with which it was initialized. Typically this is invoked in a loop</span>
-<span class="doccomment">/// which sleeps until the provided waker is invoked, as is the case in the `Future` implementation.</span>
-<span class="doccomment">/// Usually root closure will cause some memoized side effect to the render environment in order to</span>
-<span class="doccomment">/// produce a view of the input data. A Runtime&#39;s root closure will also transitively establish</span>
-<span class="doccomment">/// event handlers, either via locally polled `Future`s or via the containing environment&#39;s</span>
-<span class="doccomment">/// callback or event mechanisms.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// While the Runtime may iterate very frequently (potentially more than once for any given output</span>
-<span class="doccomment">/// frame), we use [topological memoization](crate::memo) to minimize the code run each time.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// See the documentation for [`Runtime::run_once`] for details on the core loop body.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ## Minimal Example</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// let mut rt = moxie::Runtime::new(|| {});</span>
-<span class="doccomment">/// assert_eq!(rt.revision().0, 0);</span>
-<span class="doccomment">/// for i in 1..10 {</span>
-<span class="doccomment">///     rt.run_once();</span>
-<span class="doccomment">///     assert_eq!(rt.revision(), moxie::Revision(i));</span>
-<span class="doccomment">/// }</span>
-<span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Runtime</span><span class="op">&lt;</span><span class="ident">Root</span>, <span class="ident">Out</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">Root</span>: <span class="ident">FnMut</span>() <span class="op">-&gt;</span> <span class="ident">Out</span>,
-{
-    <span class="ident">revision</span>: <span class="ident">Revision</span>,
-    <span class="ident">store</span>: <span class="ident">MemoStore</span>,
-    <span class="ident">root</span>: <span class="ident">Root</span>,
-    <span class="ident">wk</span>: <span class="ident">Waker</span>,
-    <span class="ident">span</span>: <span class="ident">Span</span>,
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Root</span>, <span class="ident">Out</span><span class="op">&gt;</span> <span class="ident">Runtime</span><span class="op">&lt;</span><span class="ident">Root</span>, <span class="ident">Out</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">Root</span>: <span class="ident">FnMut</span>() <span class="op">-&gt;</span> <span class="ident">Out</span>,
-{
-    <span class="doccomment">/// Construct a new Runtime at revision 0 and blank storage.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">root</span>: <span class="ident">Root</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="macro">trace_span</span><span class="macro">!</span>(<span class="string">&quot;runtime&quot;</span>, <span class="ident">rev</span> <span class="op">=</span> <span class="number">0</span>);
-        <span class="self">Self</span> {
-            <span class="ident">span</span>,
-            <span class="ident">revision</span>: <span class="ident">Revision</span>(<span class="number">0</span>),
-            <span class="ident">store</span>: <span class="ident">MemoStore</span>::<span class="ident">default</span>(),
-            <span class="ident">root</span>,
-            <span class="ident">wk</span>: <span class="ident">futures</span>::<span class="ident">task</span>::<span class="ident">noop_waker</span>(),
-        }
-    }
-
-    <span class="doccomment">/// The current revision of the runtime.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">revision</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Revision</span> {
-        <span class="self">self</span>.<span class="ident">revision</span>
-    }
-
-    <span class="doccomment">/// Run a single iteration of the root closure with access to the [`topo::Env`] provided by the</span>
-    <span class="doccomment">/// [`Runtime`] . Increments the [`Revision`] counter of this [`Runtime`] by one.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run_once</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Out</span> {
-        <span class="self">self</span>.<span class="ident">revision</span>.<span class="number">0</span> <span class="op">+=</span> <span class="number">1</span>;
-        <span class="self">self</span>.<span class="ident">span</span>.<span class="ident">record</span>(<span class="string">&quot;rev&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">revision</span>.<span class="number">0</span>);
-        <span class="kw">let</span> <span class="ident">_entered</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">span</span>.<span class="ident">enter</span>();
-
-        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">topo</span>::<span class="macro">root</span><span class="macro">!</span>(
-            (<span class="self">self</span>.<span class="ident">root</span>)(),
-            <span class="macro">env</span><span class="macro">!</span> {
-                <span class="ident">MemoStore</span> <span class="op">=&gt;</span> <span class="self">self</span>.<span class="ident">store</span>.<span class="ident">clone</span>(),
-                <span class="ident">Revision</span> <span class="op">=&gt;</span> <span class="self">self</span>.<span class="ident">revision</span>,
-                <span class="ident">RunLoopWaker</span> <span class="op">=&gt;</span> <span class="ident">RunLoopWaker</span>(<span class="self">self</span>.<span class="ident">wk</span>.<span class="ident">clone</span>()),
-            }
-        );
-        <span class="self">self</span>.<span class="ident">store</span>.<span class="ident">gc</span>();
-        <span class="ident">ret</span>
-    }
-
-    <span class="doccomment">/// Sets the [`std::task::Waker`] which will be called when state variables receive commits. By</span>
-    <span class="doccomment">/// default the runtime has a</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_state_change_waker</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">wk</span>: <span class="ident">Waker</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">wk</span> <span class="op">=</span> <span class="ident">wk</span>;
-        <span class="self">self</span>
-    }
-}
-
-<span class="doccomment">/// Responsible for waking the Runtime task. Because the topo environment is namespaced by type,</span>
-<span class="doccomment">/// we create a newtype here so that other crates don&#39;t accidentally cause strange behavior by</span>
-<span class="doccomment">/// overriding our access to it.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">RunLoopWaker</span>(<span class="ident">std</span>::<span class="ident">task</span>::<span class="ident">Waker</span>);
-
-<span class="kw">impl</span> <span class="ident">RunLoopWaker</span> {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">wake</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">wake_by_ref</span>();
-    }
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">propagating_env_to_runtime</span>() {
-        <span class="kw">let</span> <span class="ident">first_byte</span> <span class="op">=</span> <span class="number">0u8</span>;
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">runtime</span> <span class="op">=</span> <span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
-            <span class="kw">let</span> <span class="ident">from_env</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">topo</span>::<span class="ident">Env</span>::<span class="ident">expect</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">from_env</span>, <span class="ident">first_byte</span>);
-        });
-
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">topo</span>::<span class="ident">Env</span>::<span class="ident">get</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>().<span class="ident">is_none</span>());
-        <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(
-            {
-                <span class="ident">runtime</span>.<span class="ident">run_once</span>();
-            },
-            <span class="macro">env</span><span class="macro">!</span> {
-                <span class="ident">u8</span> <span class="op">=&gt;</span> <span class="ident">first_byte</span>,
-            }
-        );
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">topo</span>::<span class="ident">Env</span>::<span class="ident">get</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>().<span class="ident">is_none</span>());
-    }
-}
 </pre></div>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g., <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g., <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g., <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../";window.currentCrate = "moxie";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

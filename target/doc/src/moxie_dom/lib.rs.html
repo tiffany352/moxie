@@ -425,14 +425,14 @@
         .<span class="ident">expect</span>(<span class="string">&quot;must run from within a `window` with a valid `document`&quot;</span>)
 }
 
-<span class="doccomment">/// The &quot;boot sequence&quot; for a moxie-dom instance creates a [moxie::Runtime] with the provided</span>
-<span class="doccomment">/// arguments and begins scheduling its execution.</span>
+<span class="doccomment">/// The &quot;boot sequence&quot; for a moxie-dom instance creates a [moxie::embed::Runtime] with the</span>
+<span class="doccomment">/// provided arguments and begins scheduling its execution.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// The instance created here is scoped to `new_parent` and assumes that it &quot;owns&quot; the mutation</span>
 <span class="doccomment">/// of `new_parent`&#39;s children.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">boot</span>(<span class="ident">new_parent</span>: <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">sys</span>::<span class="ident">Element</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>, <span class="kw-2">mut</span> <span class="ident">root</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>() <span class="op">+</span> <span class="lifetime">&#39;static</span>) {
     <span class="kw">let</span> <span class="ident">new_parent</span> <span class="op">=</span> <span class="ident">new_parent</span>.<span class="ident">as_ref</span>().<span class="ident">to_owned</span>();
-    <span class="kw">let</span> <span class="ident">rt</span>: <span class="ident">Runtime</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>()<span class="op">&gt;</span>, ()<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="kw">move</span> <span class="op">||</span> {
+    <span class="kw">let</span> <span class="ident">rt</span>: <span class="ident">embed</span>::<span class="ident">Runtime</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>()<span class="op">&gt;</span>, ()<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">embed</span>::<span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="kw">move</span> <span class="op">||</span> {
         <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(
             { <span class="ident">root</span>() },
             <span class="macro">env</span><span class="macro">!</span> {
@@ -458,7 +458,7 @@
 }
 
 <span class="kw">struct</span> <span class="ident">WebRuntime</span> {
-    <span class="ident">rt</span>: <span class="ident">Runtime</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>()<span class="op">&gt;</span>, ()<span class="op">&gt;</span>,
+    <span class="ident">rt</span>: <span class="ident">embed</span>::<span class="ident">Runtime</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>()<span class="op">&gt;</span>, ()<span class="op">&gt;</span>,
     <span class="ident">handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">i32</span>, <span class="ident">Closure</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>()<span class="op">&gt;</span>)<span class="op">&gt;</span>,
 }
 
@@ -548,7 +548,7 @@
     {
         <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(<span class="ident">slot</span>: <span class="ident">Ev</span>::<span class="ident">NAME</span>, {
             <span class="macro">memo_with</span><span class="macro">!</span>(
-                <span class="ident">Revision</span>::<span class="ident">current</span>(),
+                <span class="ident">embed</span>::<span class="ident">Revision</span>::<span class="ident">current</span>(),
                 <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
                     <span class="kw">let</span> <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">sys</span>::<span class="ident">EventTarget</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">as_ref</span>();
                     <span class="ident">EventHandle</span>::<span class="ident">new</span>(<span class="ident">target</span>.<span class="ident">clone</span>(), <span class="ident">key</span>, <span class="ident">updater</span>)

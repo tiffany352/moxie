@@ -2,7 +2,8 @@
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">memo</span> {
     <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span> <span class="op">=&gt;</span> { ... };
 }</pre></div>
-</div><div class='docblock'><p>Memoize the provided function's output at this <code>topo::id</code>.</p>
+</div><div class='docblock'><p>Memoizes <code>init</code> at this callsite, cloning a cached <code>Stored</code> if it exists and <code>Arg</code> is the same
+as when the stored value was created.</p>
 <h1 id="signature" class="section-header"><a href="#signature">Signature</a></h1>
 <pre><code class="language-text">fn memo&lt;Arg, Stored&gt;(arg: Arg, init: impl FnOnce(&amp;Arg) -&gt; Stored) -&gt; Stored
 where

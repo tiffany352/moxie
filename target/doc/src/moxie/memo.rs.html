@@ -291,6 +291,18 @@
 <span id="291">291</span>
 <span id="292">292</span>
 <span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">any</span>::{<span class="ident">Any</span>, <span class="ident">TypeId</span>},
@@ -299,11 +311,19 @@
     <span class="ident">rc</span>::<span class="ident">Rc</span>,
 };
 
-<span class="doccomment">/// Memoizes the provided function, storing the intermediate `Stored` value in memoization storage</span>
-<span class="doccomment">/// and calling `with` with a reference to it, skipping the initialization on subsequent executions.</span>
-<span class="doccomment">/// Returns whatever `with` returns.</span>
+<span class="doccomment">/// Memoizes the provided function, caching the intermediate `Stored` value in memoization storage</span>
+<span class="doccomment">/// and only re-initializing it if `Arg` has changed since the cached value was created. Regardless</span>
+<span class="doccomment">/// of prior cached results, `with` is then called in to produce a return value.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Marks the memoized value as `Live` in the current `Revision`.</span>
+<span class="doccomment">/// Marks the memoized value as `Live` in the current `Revision`, preventing the value from being</span>
+<span class="doccomment">/// garbage collected during at the end of the current `Revision`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// If a previous value was cached for this callsite but the argument has changed and it must be</span>
+<span class="doccomment">/// re-initialized, the previous value will be dropped before the new one is initialized.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// It is currently possible to nest calls to `memo_with` and other functions in this module, but</span>
+<span class="doccomment">/// the values they store won&#39;t be correctly retained across `Revision`s until we track</span>
+<span class="doccomment">/// dependency information. As a result, it&#39;s not recommended to nest calls to `memo_with!`.</span>
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">from_env</span>(<span class="ident">store</span>: <span class="ident">MemoStore</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">memo_with</span><span class="op">&lt;</span><span class="ident">Arg</span>, <span class="ident">Stored</span>, <span class="ident">Ret</span><span class="op">&gt;</span>(
@@ -334,12 +354,14 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">with</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">with</span>); <span class="comment">// wrapping in an option dodges the borrow checker for closures</span>
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cached</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">boxed</span>)) <span class="op">=</span> <span class="ident">stored</span> {
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">_liveness</span>, <span class="ident">boxed</span>)) <span class="op">=</span> <span class="ident">stored</span> {
         <span class="kw">let</span> <span class="ident">boxed</span>: <span class="ident">Box</span><span class="op">&lt;</span>(<span class="ident">Arg</span>, <span class="ident">Stored</span>)<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">boxed</span>.<span class="ident">downcast</span>().<span class="ident">unwrap</span>();
 
         <span class="kw">if</span> <span class="ident">boxed</span>.<span class="number">0</span> <span class="op">==</span> <span class="ident">arg</span> {
             <span class="kw">let</span> <span class="ident">with</span> <span class="op">=</span> <span class="ident">with</span>.<span class="ident">take</span>().<span class="ident">unwrap</span>();
             <span class="ident">cached</span> <span class="op">=</span> <span class="prelude-val">Some</span>((<span class="ident">with</span>(<span class="kw-2">&amp;</span><span class="ident">boxed</span>.<span class="number">1</span>), <span class="ident">boxed</span>));
+        } <span class="kw">else</span> {
+            <span class="ident">drop</span>(<span class="ident">boxed</span>); <span class="comment">// ensure that previous value is destroyed before init&#39;ing another</span>
         }
     };
 
@@ -359,6 +381,9 @@
 }
 
 <span class="doccomment">/// Memoizes `expr` once at the callsite. Runs `with` on every iteration.</span>
+<span class="doccomment">/// Runs the provided expression once per [`topo::Id`]. The provided value will never be</span>
+<span class="doccomment">/// reinitialized and will be passed to `with` on every call unless the value is dropped from</span>
+<span class="doccomment">/// storage and reinitialized in a later `Revision`.</span>
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">once_with</span><span class="op">&lt;</span><span class="ident">Stored</span>, <span class="ident">Ret</span><span class="op">&gt;</span>(
     <span class="ident">expr</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>() <span class="op">-&gt;</span> <span class="ident">Stored</span>,
@@ -371,7 +396,8 @@
     <span class="macro">memo_with</span><span class="macro">!</span>((), <span class="op">|</span><span class="kw-2">&amp;</span>()<span class="op">|</span> <span class="ident">expr</span>(), <span class="ident">with</span>)
 }
 
-<span class="doccomment">/// Memoize the provided function&#39;s output at this `topo::id`.</span>
+<span class="doccomment">/// Memoizes `init` at this callsite, cloning a cached `Stored` if it exists and `Arg` is the same</span>
+<span class="doccomment">/// as when the stored value was created.</span>
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">memo</span><span class="op">&lt;</span><span class="ident">Arg</span>, <span class="ident">Stored</span><span class="op">&gt;</span>(<span class="ident">arg</span>: <span class="ident">Arg</span>, <span class="ident">init</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">Arg</span>) <span class="op">-&gt;</span> <span class="ident">Stored</span>) <span class="op">-&gt;</span> <span class="ident">Stored</span>
 <span class="kw">where</span>
@@ -381,9 +407,8 @@
     <span class="macro">memo_with</span><span class="macro">!</span>(<span class="ident">arg</span>, <span class="ident">init</span>, <span class="ident">Clone</span>::<span class="ident">clone</span>)
 }
 
-<span class="doccomment">/// Runs the provided expression once per [`topo::Id`], repeated calls at the same `Id` are assigned</span>
-<span class="doccomment">/// adjacent slots. The provided value will always be cloned on subsequent calls unless dropped</span>
-<span class="doccomment">/// from storage.</span>
+<span class="doccomment">/// Runs the provided expression once per [`topo::Id`]. The provided value will always be cloned on</span>
+<span class="doccomment">/// subsequent calls unless dropped from storage and reinitialized in a later `Revision`.</span>
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">once</span><span class="op">&lt;</span><span class="ident">Stored</span><span class="op">&gt;</span>(<span class="ident">expr</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>() <span class="op">-&gt;</span> <span class="ident">Stored</span>) <span class="op">-&gt;</span> <span class="ident">Stored</span>
 <span class="kw">where</span>
@@ -397,18 +422,14 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">MemoStore</span>(<span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">MemoStorage</span><span class="op">&gt;&gt;</span>);
 
 <span class="kw">impl</span> <span class="ident">MemoStore</span> {
-    <span class="doccomment">/// Drops memoized values that were not referenced during the last tick and resets callsite</span>
-    <span class="doccomment">/// repetition counts to 0.</span>
+    <span class="doccomment">/// Drops memoized values that were not referenced during the last `Revision`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">borrow_mut</span>().<span class="ident">gc</span>();
     }
 }
 
-<span class="doccomment">/// The memoization storage for a `Runtime`. Stores memoized values by callsite, type, and a caller-</span>
-<span class="doccomment">/// provided slot (a key for an internal hashmap)</span>
-<span class="doccomment">/// exposing a garbage collection API to the embedding `Runtime`. Also tracks the number of times a</span>
-<span class="doccomment">/// callsite has been invoked during a given `Revision`, allowing memoization to work without an</span>
-<span class="doccomment">/// explicit slot.</span>
+<span class="doccomment">/// The memoization storage for a `Runtime`. Stores memoized values by a `MemoIndex`,</span>
+<span class="doccomment">/// exposing a garbage collection API to the embedding `Runtime`.</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">MemoStorage</span> {
     <span class="ident">memos</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">MemoIndex</span>, (<span class="ident">Liveness</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Any</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
 }
@@ -424,7 +445,7 @@
 
 <span class="kw">impl</span> <span class="ident">MemoStorage</span> {
     <span class="doccomment">/// Drops memoized values that were not referenced during the last tick, removing all `Dead`</span>
-    <span class="doccomment">/// storage values and sets all remaining values to `Dead` for the next mark.</span>
+    <span class="doccomment">/// storage values and sets all remaining values to `Dead` for the next GC execution.</span>
     <span class="kw">fn</span> <span class="ident">gc</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">memos</span>
             .<span class="ident">retain</span>(<span class="op">|</span><span class="kw">_</span>, (<span class="ident">liveness</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">liveness</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">Liveness</span>::<span class="ident">Live</span>);
@@ -448,14 +469,17 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> {
-        <span class="kw">crate</span>::{<span class="ident">memo</span>::<span class="kw-2">*</span>, <span class="ident">Revision</span>},
+        <span class="kw">crate</span>::{
+            <span class="ident">embed</span>::{<span class="ident">Revision</span>, <span class="ident">Runtime</span>},
+            <span class="ident">memo</span>::<span class="kw-2">*</span>,
+        },
         <span class="ident">std</span>::{<span class="ident">cell</span>::<span class="ident">Cell</span>, <span class="ident">collections</span>::<span class="ident">HashSet</span>},
     };
 
     <span class="kw">fn</span> <span class="ident">with_test_logs</span>(<span class="ident">test</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>()) {
         <span class="ident">tracing</span>::<span class="ident">subscriber</span>::<span class="ident">with_default</span>(
-            <span class="ident">tracing_fmt</span>::<span class="ident">FmtSubscriber</span>::<span class="ident">builder</span>()
-                .<span class="ident">with_filter</span>(<span class="ident">tracing_fmt</span>::<span class="ident">filter</span>::<span class="ident">EnvFilter</span>::<span class="ident">new</span>(<span class="string">&quot;warn&quot;</span>))
+            <span class="ident">tracing_subscriber</span>::<span class="ident">FmtSubscriber</span>::<span class="ident">builder</span>()
+                .<span class="ident">with_env_filter</span>(<span class="ident">tracing_subscriber</span>::<span class="ident">filter</span>::<span class="ident">EnvFilter</span>::<span class="ident">new</span>(<span class="string">&quot;warn&quot;</span>))
                 .<span class="ident">finish</span>(),
             <span class="op">||</span> {
                 <span class="ident">tracing</span>::<span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;logging init&#39;d&quot;</span>);
@@ -471,7 +495,7 @@
 
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">prev_revision</span> <span class="op">=</span> <span class="prelude-val">None</span>;
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">comp_skipped_count</span> <span class="op">=</span> <span class="number">0</span>;
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
                 <span class="kw">let</span> <span class="ident">revision</span> <span class="op">=</span> <span class="ident">Revision</span>::<span class="ident">current</span>();
 
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pr</span>) <span class="op">=</span> <span class="ident">prev_revision</span> {
@@ -512,7 +536,7 @@
             }
             <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">ids</span>.<span class="ident">len</span>(), <span class="number">10</span>);
 
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ids</span> <span class="op">=</span> <span class="ident">HashSet</span>::<span class="ident">new</span>();
                 <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">10</span> {
                     <span class="macro">memo</span><span class="macro">!</span>(<span class="ident">i</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ids</span>.<span class="ident">insert</span>(<span class="ident">topo</span>::<span class="ident">Id</span>::<span class="ident">current</span>()));
@@ -527,7 +551,7 @@
     <span class="kw">fn</span> <span class="ident">memo_in_a_loop</span>() {
         <span class="ident">with_test_logs</span>(<span class="op">||</span> {
             <span class="kw">let</span> <span class="ident">num_iters</span> <span class="op">=</span> <span class="number">10</span>;
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counts</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[];
                 <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">num_iters</span> {
                     <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(<span class="macro">once</span><span class="macro">!</span>(<span class="op">||</span> <span class="ident">counts</span>.<span class="ident">push</span>(<span class="ident">i</span>)));
@@ -557,7 +581,7 @@
             <span class="kw">let</span> <span class="ident">loop_ct</span> <span class="op">=</span> <span class="ident">Cell</span>::<span class="ident">new</span>(<span class="number">0</span>);
             <span class="kw">let</span> <span class="ident">raw_exec</span> <span class="op">=</span> <span class="ident">Cell</span>::<span class="ident">new</span>(<span class="number">0</span>);
             <span class="kw">let</span> <span class="ident">memo_exec</span> <span class="op">=</span> <span class="ident">Cell</span>::<span class="ident">new</span>(<span class="number">0</span>);
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="op">||</span> {
                 <span class="ident">raw_exec</span>.<span class="ident">set</span>(<span class="ident">raw_exec</span>.<span class="ident">get</span>() <span class="op">+</span> <span class="number">1</span>);
                 <span class="macro">memo</span><span class="macro">!</span>(<span class="ident">loop_ct</span>.<span class="ident">get</span>(), <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
                     <span class="ident">memo_exec</span>.<span class="ident">set</span>(<span class="ident">memo_exec</span>.<span class="ident">get</span>() <span class="op">+</span> <span class="number">1</span>);
