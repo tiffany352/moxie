@@ -1,10 +1,6 @@
 
 let wasm;
 
-function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(21)(arg0, arg1);
-}
-
 const heap = new Array(32);
 
 heap.fill(undefined);
@@ -21,8 +17,11 @@ function addHeapObject(obj) {
     heap[idx] = obj;
     return idx;
 }
-function __wbg_elem_binding1(arg0, arg1, arg2) {
+function __wbg_elem_binding0(arg0, arg1, arg2) {
     wasm.__wbg_function_table.get(46)(arg0, arg1, addHeapObject(arg2));
+}
+function __wbg_elem_binding1(arg0, arg1) {
+    wasm.__wbg_function_table.get(21)(arg0, arg1);
 }
 /**
 */
@@ -260,20 +259,20 @@ function init(module) {
     let result;
     const imports = {};
     imports.wbg = {};
-    imports.wbg.__widl_instanceof_MouseEvent = function(arg0) {
-        const ret = getObject(arg0) instanceof MouseEvent;
-        return ret;
-    };
-    imports.wbg.__widl_instanceof_Event = function(arg0) {
-        const ret = getObject(arg0) instanceof Event;
-        return ret;
-    };
     imports.wbg.__widl_instanceof_KeyboardEvent = function(arg0) {
         const ret = getObject(arg0) instanceof KeyboardEvent;
         return ret;
     };
+    imports.wbg.__widl_instanceof_MouseEvent = function(arg0) {
+        const ret = getObject(arg0) instanceof MouseEvent;
+        return ret;
+    };
     imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
         takeObject(arg0);
+    };
+    imports.wbg.__widl_instanceof_Event = function(arg0) {
+        const ret = getObject(arg0) instanceof Event;
+        return ret;
     };
     imports.wbg.__widl_f_set_attribute_Element = function(arg0, arg1, arg2, arg3, arg4) {
         try {
@@ -450,13 +449,6 @@ function init(module) {
     imports.wbg.__wbindgen_throw = function(arg0, arg1) {
         throw new Error(getStringFromWasm(arg0, arg1));
     };
-    imports.wbg.__widl_f_key_KeyboardEvent = function(arg0, arg1) {
-        const ret = getObject(arg1).key;
-        const ret0 = passStringToWasm(ret);
-        const ret1 = WASM_VECTOR_LEN;
-        getInt32Memory()[arg0 / 4 + 0] = ret0;
-        getInt32Memory()[arg0 / 4 + 1] = ret1;
-    };
     imports.wbg.__widl_f_target_Event = function(arg0) {
         const ret = getObject(arg0).target;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
@@ -475,6 +467,13 @@ function init(module) {
     imports.wbg.__widl_f_set_value_HTMLInputElement = function(arg0, arg1, arg2) {
         getObject(arg0).value = getStringFromWasm(arg1, arg2);
     };
+    imports.wbg.__widl_f_key_KeyboardEvent = function(arg0, arg1) {
+        const ret = getObject(arg1).key;
+        const ret0 = passStringToWasm(ret);
+        const ret1 = WASM_VECTOR_LEN;
+        getInt32Memory()[arg0 / 4 + 0] = ret0;
+        getInt32Memory()[arg0 / 4 + 1] = ret1;
+    };
     imports.wbg.__widl_f_body_Document = function(arg0) {
         const ret = getObject(arg0).body;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
@@ -486,7 +485,7 @@ function init(module) {
             const a = state.a;
             state.a = 0;
             try {
-                return __wbg_elem_binding0(a, state.b, );
+                return __wbg_elem_binding1(a, state.b, );
             } finally {
                 if (--state.cnt === 0) wasm.__wbg_function_table.get(22)(a, state.b);
                 else state.a = a;
@@ -497,14 +496,14 @@ function init(module) {
         const ret = real;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper107 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper108 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = (arg0) => {
             state.cnt++;
             const a = state.a;
             state.a = 0;
             try {
-                return __wbg_elem_binding1(a, state.b, arg0);
+                return __wbg_elem_binding0(a, state.b, arg0);
             } finally {
                 if (--state.cnt === 0) wasm.__wbg_function_table.get(22)(a, state.b);
                 else state.a = a;

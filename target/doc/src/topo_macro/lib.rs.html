@@ -163,6 +163,9 @@
 <span id="163">163</span>
 <span id="164">164</span>
 <span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Procedural macro support crate for the `topo` crate.</span>
 
@@ -288,6 +291,9 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Will cause the annotated function to panic if it is invoked without the requested type in its</span>
 <span class="doccomment">/// `topo::Env`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// It is **strongly recommended** that functions using this attribute document this contract</span>
+<span class="doccomment">/// clearly with examples demonstrating the production of a compatible environment.</span>
 <span class="attribute">#[<span class="ident">proc_macro_attribute</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_env</span>(<span class="ident">args</span>: <span class="ident">TokenStream</span>, <span class="ident">input</span>: <span class="ident">TokenStream</span>) <span class="op">-&gt;</span> <span class="ident">TokenStream</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">input_fn</span>: <span class="ident">syn</span>::<span class="ident">ItemFn</span> <span class="op">=</span> <span class="ident">syn</span>::<span class="macro">parse_macro_input</span><span class="macro">!</span>(<span class="ident">input</span>);

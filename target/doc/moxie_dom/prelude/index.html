@@ -16,10 +16,7 @@ and only re-initializing it if <code>Arg</code> has changed since the cached val
 of prior cached results, <code>with</code> is then called in to produce a return value.</p>
 </td></tr><tr class='module-item'><td><a class="macro" href="macro.once.html" title='moxie_dom::prelude::once macro'>once</a></td><td class='docblock-short'><p>Runs the provided expression once per [<code>topo::Id</code>]. The provided value will always be cloned on
 subsequent calls unless dropped from storage and reinitialized in a later <code>Revision</code>.</p>
-</td></tr><tr class='module-item'><td><a class="macro" href="macro.once_with.html" title='moxie_dom::prelude::once_with macro'>once_with</a></td><td class='docblock-short'><p>Memoizes <code>expr</code> once at the callsite. Runs <code>with</code> on every iteration.
-Runs the provided expression once per [<code>topo::Id</code>]. The provided value will never be
-reinitialized and will be passed to <code>with</code> on every call unless the value is dropped from
-storage and reinitialized in a later <code>Revision</code>.</p>
+</td></tr><tr class='module-item'><td><a class="macro" href="macro.once_with.html" title='moxie_dom::prelude::once_with macro'>once_with</a></td><td class='docblock-short'><p>Memoizes <code>expr</code> once at the callsite. Runs <code>with</code> on every iteration.</p>
 </td></tr><tr class='module-item'><td><a class="macro" href="macro.state.html" title='moxie_dom::prelude::state macro'>state</a></td><td class='docblock-short'><p>Convenience wrapper around [<code>memo_state</code>].</p>
 </td></tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table><tr class='module-item'><td><a class="struct" href="struct.Closure.html" title='moxie_dom::prelude::Closure struct'>Closure</a></td><td class='docblock-short'><p>A handle to both a closure in Rust as well as JS closure which will invoke

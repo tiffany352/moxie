@@ -260,12 +260,12 @@ function init(module) {
     let result;
     const imports = {};
     imports.wbg = {};
+    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
+        takeObject(arg0);
+    };
     imports.wbg.__widl_instanceof_MouseEvent = function(arg0) {
         const ret = getObject(arg0) instanceof MouseEvent;
         return ret;
-    };
-    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
-        takeObject(arg0);
     };
     imports.wbg.__widl_f_create_text_node_Document = function(arg0, arg1, arg2) {
         const ret = getObject(arg0).createTextNode(getStringFromWasm(arg1, arg2));

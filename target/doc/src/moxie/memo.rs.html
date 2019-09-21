@@ -300,9 +300,6 @@
 <span id="300">300</span>
 <span id="301">301</span>
 <span id="302">302</span>
-<span id="303">303</span>
-<span id="304">304</span>
-<span id="305">305</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">any</span>::{<span class="ident">Any</span>, <span class="ident">TypeId</span>},
@@ -381,9 +378,6 @@
 }
 
 <span class="doccomment">/// Memoizes `expr` once at the callsite. Runs `with` on every iteration.</span>
-<span class="doccomment">/// Runs the provided expression once per [`topo::Id`]. The provided value will never be</span>
-<span class="doccomment">/// reinitialized and will be passed to `with` on every call unless the value is dropped from</span>
-<span class="doccomment">/// storage and reinitialized in a later `Revision`.</span>
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">once_with</span><span class="op">&lt;</span><span class="ident">Stored</span>, <span class="ident">Ret</span><span class="op">&gt;</span>(
     <span class="ident">expr</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>() <span class="op">-&gt;</span> <span class="ident">Stored</span>,
