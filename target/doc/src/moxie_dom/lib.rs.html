@@ -278,132 +278,21 @@
 <span id="278">278</span>
 <span id="279">279</span>
 <span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
-<span id="293">293</span>
-<span id="294">294</span>
-<span id="295">295</span>
-<span id="296">296</span>
-<span id="297">297</span>
-<span id="298">298</span>
-<span id="299">299</span>
-<span id="300">300</span>
-<span id="301">301</span>
-<span id="302">302</span>
-<span id="303">303</span>
-<span id="304">304</span>
-<span id="305">305</span>
-<span id="306">306</span>
-<span id="307">307</span>
-<span id="308">308</span>
-<span id="309">309</span>
-<span id="310">310</span>
-<span id="311">311</span>
-<span id="312">312</span>
-<span id="313">313</span>
-<span id="314">314</span>
-<span id="315">315</span>
-<span id="316">316</span>
-<span id="317">317</span>
-<span id="318">318</span>
-<span id="319">319</span>
-<span id="320">320</span>
-<span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-<span id="325">325</span>
-<span id="326">326</span>
-<span id="327">327</span>
-<span id="328">328</span>
-<span id="329">329</span>
-<span id="330">330</span>
-<span id="331">331</span>
-<span id="332">332</span>
-<span id="333">333</span>
-<span id="334">334</span>
-<span id="335">335</span>
-<span id="336">336</span>
-<span id="337">337</span>
-<span id="338">338</span>
-<span id="339">339</span>
-<span id="340">340</span>
-<span id="341">341</span>
-<span id="342">342</span>
-<span id="343">343</span>
-<span id="344">344</span>
-<span id="345">345</span>
-<span id="346">346</span>
-<span id="347">347</span>
-<span id="348">348</span>
-<span id="349">349</span>
-<span id="350">350</span>
-<span id="351">351</span>
-<span id="352">352</span>
-<span id="353">353</span>
-<span id="354">354</span>
-<span id="355">355</span>
-<span id="356">356</span>
-<span id="357">357</span>
-<span id="358">358</span>
-<span id="359">359</span>
-<span id="360">360</span>
-<span id="361">361</span>
-<span id="362">362</span>
-<span id="363">363</span>
-<span id="364">364</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="doccomment">//! ## Lifecycle</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```text</span>
-<span class="doccomment">//!                    +------+</span>
-<span class="doccomment">//!                    | boot |</span>
-<span class="doccomment">//!                    +---+--+</span>
-<span class="doccomment">//!                        |</span>
-<span class="doccomment">//!              +---------v------+</span>
-<span class="doccomment">//!              | calling root() |</span>
-<span class="doccomment">//!              +--+---------^---+</span>
-<span class="doccomment">//!                 |         |</span>
-<span class="doccomment">//!  +--------------v----+    | next</span>
-<span class="doccomment">//!  | awaiting state 🛆 |    | frame</span>
-<span class="doccomment">//!  +------------+------+    |</span>
-<span class="doccomment">//! event occurs, |           |</span>
-<span class="doccomment">//! updates state |           |</span>
-<span class="doccomment">//!       +-------v-----------+---+</span>
-<span class="doccomment">//!       | requestAnimationFrame |</span>
-<span class="doccomment">//!       +-----------------------+</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
 <span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>)]</span>
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">moxie</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use</span> {
-    <span class="ident">futures</span>::<span class="ident">task</span>::{<span class="ident">waker</span>, <span class="ident">ArcWake</span>},
+    <span class="kw">crate</span>::<span class="ident">embed</span>::<span class="ident">WebRuntime</span>,
     <span class="ident">moxie</span>,
-    <span class="ident">std</span>::{
-        <span class="ident">cell</span>::{<span class="ident">Cell</span>, <span class="ident">RefCell</span>},
-        <span class="ident">rc</span>::<span class="ident">Rc</span>,
-        <span class="ident">sync</span>::{
-            <span class="ident">atomic</span>::{<span class="ident">AtomicBool</span>, <span class="ident">Ordering</span>},
-            <span class="ident">Arc</span>,
-        },
-    },
+    <span class="ident">std</span>::<span class="ident">cell</span>::<span class="ident">Cell</span>,
     <span class="ident">tracing</span>::<span class="kw-2">*</span>,
     <span class="ident">wasm_bindgen</span>::{<span class="ident">prelude</span>::<span class="kw-2">*</span>, <span class="ident">JsCast</span>},
 };
 
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">embed</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">prelude</span> {
     <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::{
         <span class="ident">__element_impl</span>, <span class="ident">__text_impl</span>, <span class="ident">document</span>, <span class="ident">window</span>, <span class="ident">BlurEvent</span>, <span class="ident">ChangeEvent</span>, <span class="ident">ClickEvent</span>,
@@ -415,6 +304,23 @@
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">web_sys</span> <span class="kw">as</span> <span class="ident">sys</span>;
 
+<span class="doccomment">/// The &quot;boot sequence&quot; for a moxie-dom instance creates a [crate::embed::WebRuntime] with the</span>
+<span class="doccomment">/// provided arguments and begins scheduling its execution with `requestAnimationFrame` on state</span>
+<span class="doccomment">/// changes.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// If you need to schedule your root function more or less frequently than when state variables are</span>
+<span class="doccomment">/// updated, see the [embed](crate::embed) module for granular control over scheduling.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// In terms of the embed module&#39;s APIs, this function constructs a new</span>
+<span class="doccomment">/// [`WebRuntime`](crate::embed::WebRuntime) and begins scheduling it with an</span>
+<span class="doccomment">/// [`AnimationFrameScheduler`](crate::embed::AnimationFrameScheduler) which requests an animation</span>
+<span class="doccomment">/// frame only when there are updates to state variables.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">boot</span>(<span class="ident">new_parent</span>: <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">sys</span>::<span class="ident">Element</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>, <span class="ident">root</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>() <span class="op">+</span> <span class="lifetime">&#39;static</span>) {
+    <span class="ident">WebRuntime</span>::<span class="ident">new</span>(<span class="ident">new_parent</span>.<span class="ident">as_ref</span>().<span class="ident">to_owned</span>(), <span class="ident">root</span>)
+        .<span class="ident">animation_frame_scheduler</span>()
+        .<span class="ident">run_on_state_changes</span>();
+}
+
 <span class="doccomment">/// Returns the current window. Panics if no window is available.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">window</span>() <span class="op">-&gt;</span> <span class="ident">sys</span>::<span class="ident">Window</span> {
     <span class="ident">sys</span>::<span class="ident">window</span>().<span class="ident">expect</span>(<span class="string">&quot;must run from within a `window`&quot;</span>)
@@ -425,80 +331,6 @@
     <span class="ident">window</span>()
         .<span class="ident">document</span>()
         .<span class="ident">expect</span>(<span class="string">&quot;must run from within a `window` with a valid `document`&quot;</span>)
-}
-
-<span class="doccomment">/// The &quot;boot sequence&quot; for a moxie-dom instance creates a [moxie::embed::Runtime] with the</span>
-<span class="doccomment">/// provided arguments and begins scheduling its execution.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The instance created here is scoped to `new_parent` and assumes that it &quot;owns&quot; the mutation</span>
-<span class="doccomment">/// of `new_parent`&#39;s children.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// TODO make this either event driven or browser-driven?</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">boot</span>(<span class="ident">new_parent</span>: <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">sys</span>::<span class="ident">Element</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>, <span class="kw-2">mut</span> <span class="ident">root</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>() <span class="op">+</span> <span class="lifetime">&#39;static</span>) {
-    <span class="kw">let</span> <span class="ident">new_parent</span> <span class="op">=</span> <span class="ident">new_parent</span>.<span class="ident">as_ref</span>().<span class="ident">to_owned</span>();
-    <span class="kw">let</span> <span class="ident">rt</span>: <span class="ident">embed</span>::<span class="ident">Runtime</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>()<span class="op">&gt;</span>, ()<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">embed</span>::<span class="ident">Runtime</span>::<span class="ident">new</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="kw">move</span> <span class="op">||</span> {
-        <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(
-            { <span class="ident">root</span>() },
-            <span class="macro">env</span><span class="macro">!</span> {
-                <span class="ident">MemoElement</span> <span class="op">=&gt;</span> <span class="ident">MemoElement</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">new_parent</span>),
-            }
-        )
-    }));
-
-    <span class="kw">let</span> <span class="ident">wrt</span> <span class="op">=</span> <span class="ident">WebRuntime</span> { <span class="ident">rt</span>, <span class="ident">handle</span>: <span class="prelude-val">None</span> };
-
-    <span class="kw">let</span> <span class="ident">wrt</span> <span class="op">=</span> <span class="ident">Rc</span>::<span class="ident">new</span>((<span class="ident">AtomicBool</span>::<span class="ident">new</span>(<span class="bool-val">false</span>), <span class="ident">RefCell</span>::<span class="ident">new</span>(<span class="ident">wrt</span>)));
-    <span class="kw">let</span> <span class="ident">wrt2</span> <span class="op">=</span> <span class="ident">Rc</span>::<span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="ident">wrt</span>);
-
-    <span class="kw">let</span> <span class="ident">arc_waker</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="ident">RuntimeWaker</span> { <span class="ident">wrt</span> });
-    <span class="kw">let</span> <span class="ident">waker</span> <span class="op">=</span> <span class="ident">waker</span>(<span class="ident">arc_waker</span>);
-
-    {
-        <span class="comment">// ensure we&#39;ve released our mutable borrow by running it in a separate block</span>
-        <span class="ident">wrt2</span>.<span class="number">1</span>.<span class="ident">borrow_mut</span>().<span class="ident">rt</span>.<span class="ident">set_state_change_waker</span>(<span class="ident">waker</span>.<span class="ident">clone</span>());
-    }
-
-    <span class="ident">waker</span>.<span class="ident">wake_by_ref</span>();
-}
-
-<span class="kw">struct</span> <span class="ident">WebRuntime</span> {
-    <span class="ident">rt</span>: <span class="ident">embed</span>::<span class="ident">Runtime</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>()<span class="op">&gt;</span>, ()<span class="op">&gt;</span>,
-    <span class="ident">handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">i32</span>, <span class="ident">Closure</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>()<span class="op">&gt;</span>)<span class="op">&gt;</span>,
-}
-
-<span class="kw">struct</span> <span class="ident">RuntimeWaker</span> {
-    <span class="ident">wrt</span>: <span class="ident">Rc</span><span class="op">&lt;</span>(<span class="ident">AtomicBool</span>, <span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">WebRuntime</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
-}
-
-<span class="comment">// don&#39;t send these to workers until have a fix :P</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">RuntimeWaker</span> {}
-<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">RuntimeWaker</span> {}
-
-<span class="kw">impl</span> <span class="ident">ArcWake</span> <span class="kw">for</span> <span class="ident">RuntimeWaker</span> {
-    <span class="kw">fn</span> <span class="ident">wake_by_ref</span>(<span class="ident">arc_self</span>: <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RuntimeWaker</span><span class="op">&gt;</span>) {
-        <span class="kw">let</span> <span class="ident">scheduled</span>: <span class="kw-2">&amp;</span><span class="ident">AtomicBool</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">arc_self</span>.<span class="ident">wrt</span>.<span class="number">0</span>;
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">scheduled</span>.<span class="ident">load</span>(<span class="ident">Ordering</span>::<span class="ident">SeqCst</span>) {
-            <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;wake web runtime, scheduling&quot;</span>);
-            <span class="kw">let</span> <span class="ident">wrt</span> <span class="op">=</span> <span class="ident">Rc</span>::<span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="ident">arc_self</span>.<span class="ident">wrt</span>);
-
-            <span class="kw">let</span> <span class="ident">closure</span> <span class="op">=</span> <span class="ident">Closure</span>::<span class="ident">once</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="kw">move</span> <span class="op">||</span> {
-                <span class="kw">let</span> <span class="ident">scheduled</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">wrt</span>.<span class="number">0</span>;
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wrt</span> <span class="op">=</span> <span class="ident">wrt</span>.<span class="number">1</span>.<span class="ident">borrow_mut</span>();
-                <span class="ident">wrt</span>.<span class="ident">handle</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                <span class="ident">scopeguard</span>::<span class="macro">defer</span><span class="macro">!</span>(<span class="ident">scheduled</span>.<span class="ident">store</span>(<span class="bool-val">false</span>, <span class="ident">Ordering</span>::<span class="ident">SeqCst</span>));
-
-                <span class="ident">wrt</span>.<span class="ident">rt</span>.<span class="ident">run_once</span>();
-            }));
-            <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">window</span>()
-                .<span class="ident">request_animation_frame</span>(<span class="ident">closure</span>.<span class="ident">as_ref</span>().<span class="ident">unchecked_ref</span>())
-                .<span class="ident">unwrap</span>();
-            <span class="ident">scheduled</span>.<span class="ident">store</span>(<span class="bool-val">true</span>, <span class="ident">Ordering</span>::<span class="ident">SeqCst</span>);
-
-            <span class="ident">arc_self</span>.<span class="ident">wrt</span>.<span class="number">1</span>.<span class="ident">borrow_mut</span>().<span class="ident">handle</span> <span class="op">=</span> <span class="prelude-val">Some</span>((<span class="ident">handle</span>, <span class="ident">closure</span>));
-        } <span class="kw">else</span> {
-            <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;web runtime already scheduled&quot;</span>);
-        }
-    }
 }
 
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
@@ -552,7 +384,7 @@
     {
         <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(<span class="ident">slot</span>: <span class="ident">Ev</span>::<span class="ident">NAME</span>, {
             <span class="macro">memo_with</span><span class="macro">!</span>(
-                <span class="ident">embed</span>::<span class="ident">Revision</span>::<span class="ident">current</span>(),
+                <span class="ident">moxie</span>::<span class="ident">embed</span>::<span class="ident">Revision</span>::<span class="ident">current</span>(),
                 <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
                     <span class="kw">let</span> <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">sys</span>::<span class="ident">EventTarget</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">as_ref</span>();
                     <span class="ident">EventHandle</span>::<span class="ident">new</span>(<span class="ident">target</span>.<span class="ident">clone</span>(), <span class="ident">key</span>, <span class="ident">updater</span>)
