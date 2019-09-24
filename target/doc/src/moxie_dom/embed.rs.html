@@ -165,7 +165,7 @@
             <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(
                 { <span class="ident">root</span>() },
                 <span class="macro">env</span><span class="macro">!</span> {
-                    <span class="ident">MemoElement</span> <span class="op">=&gt;</span> <span class="ident">MemoElement</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">parent</span>),
+                    <span class="ident">MemoElement</span> <span class="op">=&gt;</span> <span class="ident">MemoElement</span>::<span class="ident">new</span>(<span class="ident">parent</span>.<span class="ident">clone</span>()),
                 }
             )
         })))
