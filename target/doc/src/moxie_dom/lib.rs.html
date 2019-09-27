@@ -287,7 +287,6 @@
 <span id="287">287</span>
 <span id="288">288</span>
 <span id="289">289</span>
-<span id="290">290</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>)]</span>
 
@@ -375,6 +374,15 @@
         }
     }
 
+    <span class="doccomment">/// Retrieves access to the raw HTML element underlying the `MemoElement`.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Because this offers an escape hatch around the memoized mutations, it should be used with</span>
+    <span class="doccomment">/// caution. Also because of this, it has a silly name intended to loudly announce that</span>
+    <span class="doccomment">/// care must be taken.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">raw_element_that_has_sharp_edges_please_be_careful</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">sys</span>::<span class="ident">Element</span> {
+        <span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">clone</span>()
+    }
+
     <span class="comment">// FIXME this should be topo-aware</span>
     <span class="comment">// TODO and it should be able to express its slot as an annotation</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">value</span>: <span class="kw">impl</span> <span class="ident">ToString</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span> {
@@ -394,18 +402,16 @@
     }
 
     <span class="comment">// FIXME this should be topo-aware</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">on</span><span class="op">&lt;</span><span class="ident">Ev</span>, <span class="ident">State</span>, <span class="ident">Updater</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">updater</span>: <span class="ident">Updater</span>, <span class="ident">key</span>: <span class="ident">Key</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">on</span><span class="op">&lt;</span><span class="ident">Ev</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">callback</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="ident">Ev</span>) <span class="op">+</span> <span class="lifetime">&#39;static</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">Ev</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Event</span>,
-        <span class="ident">State</span>: <span class="lifetime">&#39;static</span>,
-        <span class="ident">Updater</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">FnMut</span>(<span class="ident">Ev</span>, <span class="kw-2">&amp;</span><span class="ident">State</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span>,
     {
         <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(<span class="ident">slot</span>: <span class="ident">Ev</span>::<span class="ident">NAME</span>, {
             <span class="macro">memo_with</span><span class="macro">!</span>(
                 <span class="ident">moxie</span>::<span class="ident">embed</span>::<span class="ident">Revision</span>::<span class="ident">current</span>(),
                 <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
                     <span class="kw">let</span> <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">sys</span>::<span class="ident">EventTarget</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">as_ref</span>();
-                    <span class="ident">EventHandle</span>::<span class="ident">new</span>(<span class="ident">target</span>.<span class="ident">clone</span>(), <span class="ident">key</span>, <span class="ident">updater</span>)
+                    <span class="ident">EventHandle</span>::<span class="ident">new</span>(<span class="ident">target</span>.<span class="ident">clone</span>(), <span class="ident">callback</span>)
                 },
                 <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {}
             );
@@ -473,15 +479,13 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Callback</span> {
-    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">Ev</span>, <span class="ident">State</span>, <span class="ident">Updater</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="ident">Key</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span>, <span class="kw-2">mut</span> <span class="ident">updater</span>: <span class="ident">Updater</span>) <span class="op">-&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">Ev</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">cb</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="ident">Ev</span>) <span class="op">+</span> <span class="lifetime">&#39;static</span>) <span class="op">-&gt;</span> <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">Ev</span>: <span class="ident">Event</span>,
-        <span class="ident">State</span>: <span class="lifetime">&#39;static</span>,
-        <span class="ident">Updater</span>: <span class="ident">FnMut</span>(<span class="ident">Ev</span>, <span class="kw-2">&amp;</span><span class="ident">State</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     {
         <span class="kw">let</span> <span class="ident">cb</span> <span class="op">=</span> <span class="ident">Closure</span>::<span class="ident">wrap</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">ev</span>: <span class="ident">JsValue</span><span class="op">|</span> {
             <span class="kw">let</span> <span class="ident">ev</span>: <span class="ident">Ev</span> <span class="op">=</span> <span class="ident">ev</span>.<span class="ident">dyn_into</span>().<span class="ident">unwrap</span>();
-            <span class="ident">key</span>.<span class="ident">update</span>(<span class="op">|</span><span class="ident">prev</span><span class="op">|</span> <span class="ident">updater</span>(<span class="ident">ev</span>, <span class="ident">prev</span>));
+            <span class="ident">cb</span>(<span class="ident">ev</span>);
         }) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="ident">JsValue</span>)<span class="op">&gt;</span>);
         <span class="self">Self</span> { <span class="ident">cb</span> }
     }
@@ -499,17 +503,11 @@
 }
 
 <span class="kw">impl</span> <span class="ident">EventHandle</span> {
-    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">Ev</span>, <span class="ident">State</span>, <span class="ident">Updater</span><span class="op">&gt;</span>(
-        <span class="ident">target</span>: <span class="ident">web_sys</span>::<span class="ident">EventTarget</span>,
-        <span class="ident">key</span>: <span class="ident">Key</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span>,
-        <span class="ident">updater</span>: <span class="ident">Updater</span>,
-    ) <span class="op">-&gt;</span> <span class="self">Self</span>
+    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">Ev</span><span class="op">&gt;</span>(<span class="ident">target</span>: <span class="ident">web_sys</span>::<span class="ident">EventTarget</span>, <span class="ident">callback</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="ident">Ev</span>) <span class="op">+</span> <span class="lifetime">&#39;static</span>) <span class="op">-&gt;</span> <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">Ev</span>: <span class="ident">Event</span>,
-        <span class="ident">State</span>: <span class="lifetime">&#39;static</span>,
-        <span class="ident">Updater</span>: <span class="ident">FnMut</span>(<span class="ident">Ev</span>, <span class="kw-2">&amp;</span><span class="ident">State</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     {
-        <span class="kw">let</span> <span class="ident">callback</span> <span class="op">=</span> <span class="ident">Callback</span>::<span class="ident">new</span>(<span class="ident">key</span>, <span class="ident">updater</span>);
+        <span class="kw">let</span> <span class="ident">callback</span> <span class="op">=</span> <span class="ident">Callback</span>::<span class="ident">new</span>(<span class="ident">callback</span>);
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">Ev</span>::<span class="ident">NAME</span>;
         <span class="ident">target</span>
             .<span class="ident">add_event_listener_with_callback</span>(<span class="ident">name</span>, <span class="ident">callback</span>.<span class="ident">as_fn</span>())
