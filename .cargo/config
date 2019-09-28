@@ -8,6 +8,7 @@
 core-flow = """
 watch --clear
     -x fmt
+    -x fmt-tow
     -x check-core
     -x clippy-core
     -x test-core
