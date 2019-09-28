@@ -64,12 +64,14 @@
 <span id="64">64</span>
 <span id="65">65</span>
 <span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> {
     <span class="ident">filter</span>::<span class="ident">Visibility</span>,
     <span class="ident">header</span>::<span class="kw-2">*</span>,
     <span class="ident">main_section</span>::<span class="kw-2">*</span>,
-    <span class="ident">moxie_dom</span>::{<span class="ident">element</span>, <span class="ident">prelude</span>::<span class="kw-2">*</span>},
+    <span class="ident">moxie_dom</span>::{<span class="ident">div</span>, <span class="ident">moxml</span>, <span class="ident">prelude</span>::<span class="kw-2">*</span>},
     <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::{<span class="ident">AtomicU32</span>, <span class="ident">Ordering</span>},
 };
 
@@ -88,15 +90,17 @@
 
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
 <span class="kw">fn</span> <span class="ident">todo_app</span>() {
-    <span class="kw">let</span> <span class="ident">visibility</span>: <span class="ident">Key</span><span class="op">&lt;</span><span class="ident">Visibility</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">state</span><span class="macro">!</span>();
+    <span class="kw">let</span> <span class="ident">visibility</span> <span class="op">=</span> <span class="macro">state</span><span class="macro">!</span>(<span class="op">||</span> <span class="ident">Visibility</span>::<span class="ident">default</span>());
     <span class="kw">let</span> <span class="ident">todos</span> <span class="op">=</span> <span class="macro">state</span><span class="macro">!</span>(<span class="op">||</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Todo</span>::<span class="ident">new</span>(<span class="string">&quot;whoaaa&quot;</span>)]);
 
     <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(
         {
-            <span class="macro">element</span><span class="macro">!</span>(<span class="string">&quot;div&quot;</span>, <span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">attr</span>(<span class="string">&quot;class&quot;</span>, <span class="string">&quot;todoapp&quot;</span>).<span class="ident">inner</span>(<span class="op">||</span> {
-                <span class="macro">header</span><span class="macro">!</span>();
-                <span class="macro">main_section</span><span class="macro">!</span>();
-            }));
+            <span class="macro">moxml</span><span class="macro">!</span> {
+                <span class="op">&lt;</span><span class="ident">div</span> <span class="ident">class</span><span class="op">=</span><span class="string">&quot;todoapp&quot;</span><span class="op">&gt;</span>
+                    <span class="op">&lt;</span><span class="ident">header</span><span class="op">/</span><span class="op">&gt;</span>
+                    <span class="op">&lt;</span><span class="ident">main_section</span><span class="op">/</span><span class="op">&gt;</span>
+                <span class="op">&lt;</span><span class="op">/</span><span class="ident">div</span><span class="op">&gt;</span>
+            }
         },
         <span class="macro">env</span><span class="macro">!</span> {
             <span class="ident">Key</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Todo</span><span class="op">&gt;&gt;</span> <span class="op">=&gt;</span> <span class="ident">todos</span>,

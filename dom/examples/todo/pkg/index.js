@@ -2,7 +2,7 @@
 let wasm;
 
 function __wbg_elem_binding0(arg0, arg1) {
-    wasm.__wbg_function_table.get(22)(arg0, arg1);
+    wasm.__wbg_function_table.get(20)(arg0, arg1);
 }
 
 const heap = new Array(32);
@@ -22,7 +22,7 @@ function addHeapObject(obj) {
     return idx;
 }
 function __wbg_elem_binding1(arg0, arg1, arg2) {
-    wasm.__wbg_function_table.get(49)(arg0, arg1, addHeapObject(arg2));
+    wasm.__wbg_function_table.get(46)(arg0, arg1, addHeapObject(arg2));
 }
 /**
 */
@@ -481,7 +481,7 @@ function init(module) {
     imports.wbg.__widl_f_set_value_HTMLInputElement = function(arg0, arg1, arg2) {
         getObject(arg0).value = getStringFromWasm(arg1, arg2);
     };
-    imports.wbg.__wbindgen_closure_wrapper168 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper170 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
@@ -490,7 +490,7 @@ function init(module) {
             try {
                 return __wbg_elem_binding0(a, state.b, );
             } finally {
-                if (--state.cnt === 0) wasm.__wbg_function_table.get(23)(a, state.b);
+                if (--state.cnt === 0) wasm.__wbg_function_table.get(21)(a, state.b);
                 else state.a = a;
             }
         }
@@ -499,7 +499,7 @@ function init(module) {
         const ret = real;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper122 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper125 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = (arg0) => {
             state.cnt++;
@@ -508,7 +508,7 @@ function init(module) {
             try {
                 return __wbg_elem_binding1(a, state.b, arg0);
             } finally {
-                if (--state.cnt === 0) wasm.__wbg_function_table.get(23)(a, state.b);
+                if (--state.cnt === 0) wasm.__wbg_function_table.get(21)(a, state.b);
                 else state.a = a;
             }
         }
