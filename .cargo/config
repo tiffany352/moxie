@@ -57,6 +57,21 @@ clippy-dom = """clippy
 """
 
 ####################################################################################################
+# gtk
+
+gtk-flow = """
+watch
+    -x clippy-gtk
+    -x test-gtk
+    -x gtk-hacking
+"""
+
+clippy-gtk = "clippy --all-targets --package moxie-gtk"
+test-gtk = "test --package moxie-gtk"
+
+gtk-hacking = "run --package moxie-gtk --example hacking"
+
+####################################################################################################
 # website
 
 site-flow = "watch --clear -x build-website"

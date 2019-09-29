@@ -1,0 +1,12 @@
+[package]
+name = "moxie-gtk"
+version = "0.1.0-pre"
+authors = ["Adam Perry <adam.n.perry@gmail.com>"]
+edition = "2018"
+license = "MIT/Apache-2.0"
+description = "GTK bindings to moxie."
+repository = "https://github.com/anp/moxie"
+
+[dependencies]
+glib = "0.8.2"
+gtk = "0.7.0"
