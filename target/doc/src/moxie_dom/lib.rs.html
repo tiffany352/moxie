@@ -221,102 +221,29 @@
 <span id="221">221</span>
 <span id="222">222</span>
 <span id="223">223</span>
-<span id="224">224</span>
-<span id="225">225</span>
-<span id="226">226</span>
-<span id="227">227</span>
-<span id="228">228</span>
-<span id="229">229</span>
-<span id="230">230</span>
-<span id="231">231</span>
-<span id="232">232</span>
-<span id="233">233</span>
-<span id="234">234</span>
-<span id="235">235</span>
-<span id="236">236</span>
-<span id="237">237</span>
-<span id="238">238</span>
-<span id="239">239</span>
-<span id="240">240</span>
-<span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
-<span id="244">244</span>
-<span id="245">245</span>
-<span id="246">246</span>
-<span id="247">247</span>
-<span id="248">248</span>
-<span id="249">249</span>
-<span id="250">250</span>
-<span id="251">251</span>
-<span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="doccomment">//! Tools for declaratively constructing and incrementally updating HTML DOM trees on the web. Based</span>
+<span class="doccomment">//! on the [`moxie`] UI runtime.</span>
+
+<span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>, <span class="ident">intra_doc_link_resolution_failure</span>)]</span>
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">moxie</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use</span> {
-    <span class="kw">crate</span>::<span class="ident">embed</span>::<span class="ident">WebRuntime</span>,
+    <span class="kw">crate</span>::{
+        <span class="ident">embed</span>::<span class="ident">WebRuntime</span>,
+        <span class="ident">event</span>::{<span class="ident">Event</span>, <span class="ident">EventHandle</span>},
+    },
     <span class="ident">moxie</span>,
     <span class="ident">std</span>::<span class="ident">cell</span>::<span class="ident">Cell</span>,
     <span class="ident">tracing</span>::<span class="kw-2">*</span>,
-    <span class="ident">wasm_bindgen</span>::{<span class="ident">prelude</span>::<span class="kw-2">*</span>, <span class="ident">JsCast</span>},
 };
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">elements</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">embed</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">prelude</span> {
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::{
-        <span class="ident">__element_impl</span>, <span class="ident">__text_impl</span>, <span class="ident">document</span>, <span class="ident">window</span>, <span class="ident">BlurEvent</span>, <span class="ident">ChangeEvent</span>, <span class="ident">ClickEvent</span>,
-        <span class="ident">DoubleClickEvent</span>, <span class="ident">Event</span>, <span class="ident">KeyDownEvent</span>,
-    };
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">moxie</span>::<span class="kw-2">*</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">wasm_bindgen</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
-}
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">event</span>;
 
-<span class="attribute">#[<span class="ident">proc_macro_hack</span>::<span class="ident">proc_macro_hack</span>(<span class="ident">support_nested</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">moxml</span>::<span class="ident">moxml</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">web_sys</span> <span class="kw">as</span> <span class="ident">sys</span>;
 
 <span class="doccomment">/// The &quot;boot sequence&quot; for a moxie-dom instance creates a [crate::embed::WebRuntime] with the</span>
@@ -337,17 +264,19 @@
 }
 
 <span class="doccomment">/// Returns the current window. Panics if no window is available.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">window</span>() <span class="op">-&gt;</span> <span class="ident">sys</span>::<span class="ident">Window</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">window</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sys</span>::<span class="ident">Window</span> {
     <span class="ident">sys</span>::<span class="ident">window</span>().<span class="ident">expect</span>(<span class="string">&quot;must run from within a `window`&quot;</span>)
 }
 
 <span class="doccomment">/// Returns the current document. Panics if called outside a web document context.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">document</span>() <span class="op">-&gt;</span> <span class="ident">sys</span>::<span class="ident">Document</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">document</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sys</span>::<span class="ident">Document</span> {
     <span class="ident">window</span>()
         .<span class="ident">document</span>()
         .<span class="ident">expect</span>(<span class="string">&quot;must run from within a `window` with a valid `document`&quot;</span>)
 }
 
+<span class="doccomment">/// Create and mount a [DOM text node](https://developer.mozilla.org/en-US/docs/Web/API/Text).</span>
+<span class="doccomment">/// This is normally called by the [`moxie::mox!`] macro.</span>
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">from_env</span>(<span class="ident">parent</span>: <span class="ident">MemoElement</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">text</span>(<span class="ident">s</span>: <span class="kw">impl</span> <span class="ident">ToString</span>) {
@@ -358,40 +287,68 @@
     <span class="ident">parent</span>.<span class="ident">ensure_child_attached</span>(<span class="kw-2">&amp;</span><span class="ident">text_node</span>);
 }
 
+<span class="doccomment">/// Create and mount an [HTML element](https://developer.mozilla.org/en-US/docs/Web/API/Element).</span>
+<span class="doccomment">/// Called from the individual element macros, which in turn are normally called by the output of</span>
+<span class="doccomment">/// the [`moxie::mox!`] macro.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The created DOM node is memoized at the bound callsite, allowing for subsequent re-executions to</span>
+<span class="doccomment">/// be very cheap.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Mutation of the created element is performed during the `with_elem` closure via the provided</span>
+<span class="doccomment">/// [`moxie_dom::MemoElement`] wrapper.</span>
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">from_env</span>(<span class="ident">parent</span>: <span class="ident">MemoElement</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">element</span><span class="op">&lt;</span><span class="ident">ChildRet</span><span class="op">&gt;</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">with_elem</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">MemoElement</span>) <span class="op">-&gt;</span> <span class="ident">ChildRet</span>) {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">element</span><span class="op">&lt;</span><span class="ident">ChildRet</span><span class="op">&gt;</span>(
+    <span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
+    <span class="ident">with_elem</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">MemoElement</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ChildRet</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ChildRet</span> {
     <span class="kw">let</span> <span class="ident">elem</span> <span class="op">=</span> <span class="macro">memo</span><span class="macro">!</span>(<span class="ident">ty</span>, <span class="op">|</span><span class="ident">ty</span><span class="op">|</span> <span class="ident">document</span>().<span class="ident">create_element</span>(<span class="ident">ty</span>).<span class="ident">unwrap</span>());
     <span class="ident">parent</span>.<span class="ident">ensure_child_attached</span>(<span class="kw-2">&amp;</span><span class="ident">elem</span>);
     <span class="kw">let</span> <span class="ident">elem</span> <span class="op">=</span> <span class="ident">MemoElement</span>::<span class="ident">new</span>(<span class="ident">elem</span>);
-    <span class="ident">with_elem</span>(<span class="kw-2">&amp;</span><span class="ident">elem</span>);
+    <span class="ident">with_elem</span>(<span class="kw-2">&amp;</span><span class="ident">elem</span>)
 }
 
+<span class="doccomment">/// A topologically-aware &quot;incremental smart pointer&quot; for an HTML element.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Created during execution of the (element) macro and the element-specific wrappers. Offers a</span>
+<span class="doccomment">/// &quot;stringly-typed&quot; API for mutating the contained DOM nodes, adhering fairly closely to the</span>
+<span class="doccomment">/// upstream web specs.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MemoElement</span> {
-    <span class="ident">curr</span>: <span class="ident">Cell</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">sys</span>::<span class="ident">Node</span><span class="op">&gt;&gt;</span>,
+    <span class="ident">curr</span>: <span class="ident">Cell</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">sys</span>::<span class="ident">Node</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">elem</span>: <span class="ident">sys</span>::<span class="ident">Element</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">MemoElement</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">elem</span>: <span class="ident">sys</span>::<span class="ident">Element</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">elem</span>: <span class="ident">sys</span>::<span class="ident">Element</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">curr</span>: <span class="ident">Cell</span>::<span class="ident">new</span>(<span class="prelude-val">None</span>),
             <span class="ident">elem</span>,
         }
     }
 
-    <span class="doccomment">/// Retrieves access to the raw HTML element underlying the `MemoElement`.</span>
+    <span class="doccomment">/// Retrieves access to the raw HTML element underlying the (MemoElement).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Because this offers an escape hatch around the memoized mutations, it should be used with</span>
     <span class="doccomment">/// caution. Also because of this, it has a silly name intended to loudly announce that</span>
     <span class="doccomment">/// care must be taken.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">raw_element_that_has_sharp_edges_please_be_careful</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">sys</span>::<span class="ident">Element</span> {
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Code called by the root function of your application will be run quite frequently and</span>
+    <span class="doccomment">/// so the tools for memoization are important for keeping your application responsive. If you</span>
+    <span class="doccomment">/// have legitimate needs for this API, please consider filing an issue with your use case so</span>
+    <span class="doccomment">/// the maintainers of this crate can consider &quot;official&quot; ways to support it.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">raw_element_that_has_sharp_edges_please_be_careful</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sys</span>::<span class="ident">Element</span> {
         <span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">clone</span>()
     }
 
     <span class="comment">// FIXME this should be topo-aware</span>
     <span class="comment">// TODO and it should be able to express its slot as an annotation</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">value</span>: <span class="kw">impl</span> <span class="ident">ToString</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span> {
+    <span class="doccomment">/// Declare an attribute of the element, mutating the actual element&#39;s attribute when the passed</span>
+    <span class="doccomment">/// value changes.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// A guard value is stored as a resulting &quot;effect&quot; of the mutation, and removes the attribute</span>
+    <span class="doccomment">/// when `drop`ped, to ensure that the attribute is removed when this declaration is no longer</span>
+    <span class="doccomment">/// referenced in the most recent (`moxie::Revision`).</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">value</span>: <span class="kw">impl</span> <span class="ident">ToString</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span> {
         <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(<span class="ident">slot</span>: <span class="ident">name</span>, {
             <span class="macro">memo_with</span><span class="macro">!</span>(
                 <span class="ident">value</span>.<span class="ident">to_string</span>(),
@@ -408,7 +365,15 @@
     }
 
     <span class="comment">// FIXME this should be topo-aware</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">on</span><span class="op">&lt;</span><span class="ident">Ev</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">callback</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="ident">Ev</span>) <span class="op">+</span> <span class="lifetime">&#39;static</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span>
+    <span class="doccomment">/// Declare an event handler on the element.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// A guard value is stored as a resulting &quot;effect&quot; of the mutation, and removes the attribute</span>
+    <span class="doccomment">/// when `drop`ped, to ensure that the attribute is removed when this declaration is no longer</span>
+    <span class="doccomment">/// referenced in the most recent (`moxie::Revision`).</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Currently this is performed on every Revision, as changes to event handlers don&#39;t typically</span>
+    <span class="doccomment">/// affect the debugging experience and have not yet shown up in performance profiles.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">on</span><span class="op">&lt;</span><span class="ident">Ev</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">callback</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="ident">Ev</span>) <span class="op">+</span> <span class="lifetime">&#39;static</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">Ev</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Event</span>,
     {
@@ -443,8 +408,11 @@
         }
     }
 
+    <span class="doccomment">/// Declare the inner contents of the element, usually declaring children within the inner</span>
+    <span class="doccomment">/// scope. After any children have been run and their nodes attached, this clears any trailing</span>
+    <span class="doccomment">/// child nodes to ensure the element&#39;s children are correct per the latest declaration.</span>
     <span class="comment">// FIXME this should be topo-aware</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inner</span><span class="op">&lt;</span><span class="ident">Ret</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">children</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>() <span class="op">-&gt;</span> <span class="ident">Ret</span>) <span class="op">-&gt;</span> <span class="ident">Ret</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inner</span><span class="op">&lt;</span><span class="ident">Ret</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">children</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ret</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ret</span> {
         <span class="kw">let</span> <span class="ident">elem</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">clone</span>();
         <span class="kw">let</span> <span class="ident">last_desired_child</span>;
         <span class="kw">let</span> <span class="ident">ret</span>;
@@ -457,10 +425,12 @@
                 <span class="ident">last_desired_child</span> <span class="op">=</span> <span class="ident">topo</span>::<span class="ident">Env</span>::<span class="ident">expect</span>::<span class="op">&lt;</span><span class="ident">MemoElement</span><span class="op">&gt;</span>().<span class="ident">curr</span>.<span class="ident">replace</span>(<span class="prelude-val">None</span>);
             },
             <span class="macro">env</span><span class="macro">!</span> {
-                <span class="ident">MemoElement</span> <span class="op">=&gt;</span> <span class="ident">MemoElement</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">clone</span>()),
+                <span class="ident">MemoElement</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MemoElement</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">clone</span>()),
             }
         );
 
+        <span class="comment">// if there weren&#39;t any children declared this revision, we need to make sure we clean up</span>
+        <span class="comment">// any from the last revision</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">next_to_remove</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span> <span class="ident">last_desired_child</span> {
             <span class="ident">c</span>.<span class="ident">next_sibling</span>()
         } <span class="kw">else</span> {
@@ -475,113 +445,5 @@
         <span class="ident">ret</span>
     }
 }
-
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Event</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">web_sys</span>::<span class="ident">Event</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">JsCast</span> {
-    <span class="kw">const</span> <span class="ident">NAME</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>;
-}
-
-<span class="kw">struct</span> <span class="ident">Callback</span> {
-    <span class="ident">cb</span>: <span class="ident">Closure</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="ident">JsValue</span>)<span class="op">&gt;</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">Callback</span> {
-    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">Ev</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">cb</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="ident">Ev</span>) <span class="op">+</span> <span class="lifetime">&#39;static</span>) <span class="op">-&gt;</span> <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">Ev</span>: <span class="ident">Event</span>,
-    {
-        <span class="kw">let</span> <span class="ident">cb</span> <span class="op">=</span> <span class="ident">Closure</span>::<span class="ident">wrap</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">ev</span>: <span class="ident">JsValue</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">ev</span>: <span class="ident">Ev</span> <span class="op">=</span> <span class="ident">ev</span>.<span class="ident">dyn_into</span>().<span class="ident">unwrap</span>();
-            <span class="ident">cb</span>(<span class="ident">ev</span>);
-        }) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="ident">JsValue</span>)<span class="op">&gt;</span>);
-        <span class="self">Self</span> { <span class="ident">cb</span> }
-    }
-
-    <span class="kw">fn</span> <span class="ident">as_fn</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">js_sys</span>::<span class="ident">Function</span> {
-        <span class="self">self</span>.<span class="ident">cb</span>.<span class="ident">as_ref</span>().<span class="ident">unchecked_ref</span>()
-    }
-}
-
-<span class="attribute">#[<span class="ident">must_use</span>]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EventHandle</span> {
-    <span class="ident">target</span>: <span class="ident">web_sys</span>::<span class="ident">EventTarget</span>,
-    <span class="ident">callback</span>: <span class="ident">Callback</span>,
-    <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">EventHandle</span> {
-    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">Ev</span><span class="op">&gt;</span>(<span class="ident">target</span>: <span class="ident">web_sys</span>::<span class="ident">EventTarget</span>, <span class="ident">callback</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="ident">Ev</span>) <span class="op">+</span> <span class="lifetime">&#39;static</span>) <span class="op">-&gt;</span> <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">Ev</span>: <span class="ident">Event</span>,
-    {
-        <span class="kw">let</span> <span class="ident">callback</span> <span class="op">=</span> <span class="ident">Callback</span>::<span class="ident">new</span>(<span class="ident">callback</span>);
-        <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">Ev</span>::<span class="ident">NAME</span>;
-        <span class="ident">target</span>
-            .<span class="ident">add_event_listener_with_callback</span>(<span class="ident">name</span>, <span class="ident">callback</span>.<span class="ident">as_fn</span>())
-            .<span class="ident">unwrap</span>();
-        <span class="self">Self</span> {
-            <span class="ident">target</span>,
-            <span class="ident">callback</span>,
-            <span class="ident">name</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">EventHandle</span> {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">target</span>
-            .<span class="ident">remove_event_listener_with_callback</span>(<span class="self">self</span>.<span class="ident">name</span>, <span class="self">self</span>.<span class="ident">callback</span>.<span class="ident">as_fn</span>())
-            .<span class="ident">unwrap</span>();
-    }
-}
-
-<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">event_ty</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_str</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">parent_ty</span>:<span class="ident">ty</span>) <span class="op">=&gt;</span> {
-        <span class="attribute">#[<span class="ident">wasm_bindgen</span>]</span>
-        <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">parent_ty</span>);
-
-        <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">web_sys</span>::<span class="ident">Event</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
-            <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">web_sys</span>::<span class="ident">Event</span> {
-                <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>()
-            }
-        }
-
-        <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">JsValue</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
-            <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">JsValue</span> {
-                <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>()
-            }
-        }
-
-        <span class="kw">impl</span> <span class="ident">std</span>::<span class="ident">ops</span>::<span class="ident">Deref</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
-            <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">parent_ty</span>;
-            <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">Target</span> {
-                <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
-            }
-        }
-
-        <span class="kw">impl</span> <span class="ident">JsCast</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
-            <span class="kw">fn</span> <span class="ident">instanceof</span>(<span class="ident">val</span>: <span class="kw-2">&amp;</span><span class="ident">JsValue</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
-                <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">parent_ty</span> <span class="kw">as</span> <span class="ident">JsCast</span><span class="op">&gt;</span>::<span class="ident">instanceof</span>(<span class="ident">val</span>)
-            }
-
-            <span class="kw">fn</span> <span class="ident">unchecked_from_js</span>(<span class="ident">val</span>: <span class="ident">JsValue</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">parent_ty</span> <span class="kw">as</span> <span class="ident">JsCast</span><span class="op">&gt;</span>::<span class="ident">unchecked_from_js</span>(<span class="ident">val</span>))
-            }
-
-            <span class="kw">fn</span> <span class="ident">unchecked_from_js_ref</span>(<span class="ident">_val</span>: <span class="kw-2">&amp;</span><span class="ident">JsValue</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span> {
-                <span class="macro">unimplemented</span><span class="macro">!</span>()
-            }
-        }
-
-        <span class="kw">impl</span> <span class="ident">Event</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
-            <span class="kw">const</span> <span class="ident">NAME</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty_str</span>;
-        }
-    };
-}
-
-<span class="macro">event_ty</span><span class="macro">!</span>(<span class="ident">BlurEvent</span>, <span class="string">&quot;blur&quot;</span>, <span class="ident">web_sys</span>::<span class="ident">FocusEvent</span>);
-<span class="macro">event_ty</span><span class="macro">!</span>(<span class="ident">ChangeEvent</span>, <span class="string">&quot;change&quot;</span>, <span class="ident">web_sys</span>::<span class="ident">Event</span>);
-<span class="macro">event_ty</span><span class="macro">!</span>(<span class="ident">ClickEvent</span>, <span class="string">&quot;click&quot;</span>, <span class="ident">web_sys</span>::<span class="ident">MouseEvent</span>);
-<span class="macro">event_ty</span><span class="macro">!</span>(<span class="ident">DoubleClickEvent</span>, <span class="string">&quot;dblclick&quot;</span>, <span class="ident">web_sys</span>::<span class="ident">MouseEvent</span>);
-<span class="macro">event_ty</span><span class="macro">!</span>(<span class="ident">KeyDownEvent</span>, <span class="string">&quot;keydown&quot;</span>, <span class="ident">web_sys</span>::<span class="ident">KeyboardEvent</span>);
 </pre></div>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g., <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g., <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g., <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../";window.currentCrate = "moxie_dom";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

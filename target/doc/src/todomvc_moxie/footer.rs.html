@@ -52,35 +52,35 @@
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> {
     <span class="kw">crate</span>::{<span class="ident">filter</span>::<span class="kw-2">*</span>, <span class="ident">Todo</span>},
-    <span class="ident">moxie_dom</span>::{<span class="ident">button</span>, <span class="ident">footer</span> <span class="kw">as</span> <span class="ident">html_footer</span>, <span class="ident">moxml</span>, <span class="ident">prelude</span>::<span class="kw-2">*</span>, <span class="ident">span</span>, <span class="ident">strong</span>, <span class="ident">text</span>},
+    <span class="ident">moxie_dom</span>::<span class="kw-2">*</span>,
 };
 
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">items_remaining</span>(<span class="ident">num_active</span>: <span class="ident">usize</span>) {
-    <span class="macro">moxml</span><span class="macro">!</span> {
+    <span class="macro">mox</span><span class="macro">!</span> {
         <span class="op">&lt;</span><span class="ident">span</span> <span class="ident">class</span><span class="op">=</span><span class="string">&quot;todo-count&quot;</span><span class="op">&gt;</span>
             <span class="op">&lt;</span><span class="ident">strong</span><span class="op">&gt;</span>
             {
-                <span class="kw">if</span> <span class="ident">num_active</span> <span class="op">==</span> <span class="number">0</span> {
+                <span class="kw">if</span> <span class="ident">num_active</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
                     <span class="macro">text</span><span class="macro">!</span>(<span class="string">&quot;No&quot;</span>)
                 } <span class="kw">else</span> {
                     <span class="macro">text</span><span class="macro">!</span>(<span class="ident">num_active</span>)
                 }
             }
             <span class="op">&lt;</span><span class="op">/</span><span class="ident">strong</span><span class="op">&gt;</span>
-            {<span class="op">%</span> <span class="string">&quot; {} left&quot;</span>, <span class="kw">if</span> <span class="ident">num_active</span> <span class="op">==</span> <span class="number">1</span> { <span class="string">&quot;item&quot;</span> } <span class="kw">else</span> { <span class="string">&quot;items&quot;</span> } }
+            {<span class="op">%</span> <span class="string">&quot; {} left&quot;</span>, <span class="kw">if</span> <span class="ident">num_active</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> { <span class="string">&quot;item&quot;</span> } <span class="kw">else</span> { <span class="string">&quot;items&quot;</span> } }
         <span class="op">&lt;</span><span class="op">/</span><span class="ident">span</span><span class="op">&gt;</span>
     };
 }
 
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
-<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">from_env</span>(<span class="ident">todos</span>: <span class="ident">Key</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Todo</span><span class="op">&gt;&gt;</span>)]</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">from_env</span>(<span class="ident">todos</span>: <span class="ident">Key</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Todo</span><span class="op">&gt;</span><span class="op">&gt;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clear_completed_button</span>() {
     <span class="kw">let</span> <span class="ident">todos</span> <span class="op">=</span> <span class="ident">todos</span>.<span class="ident">clone</span>();
-    <span class="kw">let</span> <span class="ident">on_click</span> <span class="op">=</span> <span class="kw">move</span> <span class="op">|</span><span class="kw">_</span>: <span class="ident">ClickEvent</span><span class="op">|</span> {
+    <span class="kw">let</span> <span class="ident">on_click</span> <span class="op">=</span> <span class="kw">move</span> <span class="op">|</span><span class="kw">_</span>: <span class="ident">event</span>::<span class="ident">Click</span><span class="op">|</span> {
         <span class="ident">todos</span>.<span class="ident">update</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="prelude-val">Some</span>(<span class="ident">t</span>.<span class="ident">iter</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="op">!</span><span class="ident">t</span>.<span class="ident">completed</span>).<span class="ident">cloned</span>().<span class="ident">collect</span>()))
     };
-    <span class="macro">moxml</span><span class="macro">!</span> {
+    <span class="macro">mox</span><span class="macro">!</span> {
         <span class="op">&lt;</span><span class="ident">button</span> <span class="ident">class</span><span class="op">=</span><span class="string">&quot;clear-completed&quot;</span> <span class="ident">on</span><span class="op">=</span>{<span class="ident">on_click</span>}<span class="op">&gt;</span>
             <span class="string">&quot;Clear completed&quot;</span>
         <span class="op">&lt;</span><span class="op">/</span><span class="ident">button</span><span class="op">&gt;</span>
@@ -88,17 +88,17 @@
 }
 
 <span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">footer</span>(<span class="ident">num_complete</span>: <span class="ident">usize</span>, <span class="ident">num_active</span>: <span class="ident">usize</span>) {
-    <span class="macro">moxml</span><span class="macro">!</span> {
-        <span class="op">&lt;</span><span class="ident">html_footer</span> <span class="ident">class</span><span class="op">=</span><span class="string">&quot;footer&quot;</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">filter_footer</span>(<span class="ident">num_complete</span>: <span class="ident">usize</span>, <span class="ident">num_active</span>: <span class="ident">usize</span>) {
+    <span class="macro">mox</span><span class="macro">!</span> {
+        <span class="op">&lt;</span><span class="ident">footer</span> <span class="ident">class</span><span class="op">=</span><span class="string">&quot;footer&quot;</span><span class="op">&gt;</span>
             <span class="op">&lt;</span><span class="ident">items_remaining</span> <span class="kw">_</span><span class="op">=</span>(<span class="ident">num_active</span>)<span class="op">/</span><span class="op">&gt;</span>
             <span class="op">&lt;</span><span class="ident">filter</span><span class="op">/</span><span class="op">&gt;</span>
             {
                 <span class="kw">if</span> <span class="ident">num_complete</span> <span class="op">&gt;</span> <span class="number">0</span> {
-                    <span class="macro">moxml</span><span class="macro">!</span> { <span class="op">&lt;</span><span class="ident">clear_completed_button</span><span class="op">/</span><span class="op">&gt;</span> };
+                    <span class="macro">mox</span><span class="macro">!</span> { <span class="op">&lt;</span><span class="ident">clear_completed_button</span><span class="op">/</span><span class="op">&gt;</span> };
                 }
             }
-        <span class="op">&lt;</span><span class="op">/</span><span class="ident">html_footer</span><span class="op">&gt;</span>
+        <span class="op">&lt;</span><span class="op">/</span><span class="ident">footer</span><span class="op">&gt;</span>
     }
 }
 </pre></div>

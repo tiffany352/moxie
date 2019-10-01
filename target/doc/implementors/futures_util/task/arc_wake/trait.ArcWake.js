@@ -6,5 +6,4 @@ implementors["moxie_dom"] = [{text:"impl <a class=\"trait\" href=\"https://rust-
             } else {
                 window.pending_implementors = implementors;
             }
-        
-})()
+        })()

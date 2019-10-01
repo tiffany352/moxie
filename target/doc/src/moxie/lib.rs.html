@@ -73,6 +73,10 @@
 <span id="73">73</span>
 <span id="74">74</span>
 <span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! moxie aims to empower everyone to build reliable and efficient human interfaces. This crate</span>
 <span class="doccomment">//! implements a lightweight &amp; platform-agnostic UI runtime which powers a declarative style for</span>
@@ -140,6 +144,10 @@
 
 <span class="attribute">#![<span class="ident">forbid</span>(<span class="ident">unsafe_code</span>)]</span>
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">clippy</span>::<span class="ident">all</span>, <span class="ident">intra_doc_link_resolution_failure</span>, <span class="ident">missing_docs</span>)]</span>
+
+<span class="doccomment">/// TODO figure out where this is actually documented</span>
+<span class="attribute">#[<span class="ident">proc_macro_hack</span>::<span class="ident">proc_macro_hack</span>(<span class="ident">support_nested</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mox</span>::<span class="ident">mox</span>;
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">embed</span>;
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
