@@ -321,8 +321,8 @@
 <span class="doccomment">/// It is currently possible to nest calls to `memo_with` and other functions in this module, but</span>
 <span class="doccomment">/// the values they store won&#39;t be correctly retained across `Revision`s until we track</span>
 <span class="doccomment">/// dependency information. As a result, it&#39;s not recommended to nest calls to `memo_with!`.</span>
-<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
-<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">from_env</span>(<span class="ident">store</span>: <span class="ident">MemoStore</span>)]</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">nested</span>]</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">from_env</span>(<span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="ident">MemoStore</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">memo_with</span><span class="op">&lt;</span><span class="ident">Arg</span>, <span class="ident">Stored</span>, <span class="ident">Ret</span><span class="op">&gt;</span>(
     <span class="ident">arg</span>: <span class="ident">Arg</span>,
     <span class="ident">init</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">Arg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Stored</span>,
@@ -378,7 +378,7 @@
 }
 
 <span class="doccomment">/// Memoizes `expr` once at the callsite. Runs `with` on every iteration.</span>
-<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">nested</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">once_with</span><span class="op">&lt;</span><span class="ident">Stored</span>, <span class="ident">Ret</span><span class="op">&gt;</span>(
     <span class="ident">expr</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Stored</span>,
     <span class="ident">with</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">Stored</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ret</span>,
@@ -392,7 +392,7 @@
 
 <span class="doccomment">/// Memoizes `init` at this callsite, cloning a cached `Stored` if it exists and `Arg` is the same</span>
 <span class="doccomment">/// as when the stored value was created.</span>
-<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">nested</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">memo</span><span class="op">&lt;</span><span class="ident">Arg</span>, <span class="ident">Stored</span><span class="op">&gt;</span>(<span class="ident">arg</span>: <span class="ident">Arg</span>, <span class="ident">init</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">Arg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Stored</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Stored</span>
 <span class="kw">where</span>
     <span class="ident">Arg</span>: <span class="ident">PartialEq</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
@@ -403,7 +403,7 @@
 
 <span class="doccomment">/// Runs the provided expression once per [`topo::Id`]. The provided value will always be cloned on</span>
 <span class="doccomment">/// subsequent calls unless dropped from storage and reinitialized in a later `Revision`.</span>
-<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">nested</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">once</span><span class="op">&lt;</span><span class="ident">Stored</span><span class="op">&gt;</span>(<span class="ident">expr</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Stored</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Stored</span>
 <span class="kw">where</span>
     <span class="ident">Stored</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,

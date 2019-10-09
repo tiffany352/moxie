@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["VirtData","The data of a node in the virtual DOM tree."]],"fn":[["create_element","Create a new virtual element of the provided type."]],"struct":[["VirtNode","A node in the \"virtual DOM\" implemented in `rsdom`."]]});

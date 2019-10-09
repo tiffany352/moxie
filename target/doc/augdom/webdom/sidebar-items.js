@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Callback","A dynamically-allocated closure that is callable from JavaScript."]]});

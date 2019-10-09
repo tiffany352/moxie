@@ -103,7 +103,7 @@
 <span class="doccomment">//! Memoization is the core tool which moxie provides to store data across `Revision`s and to</span>
 <span class="doccomment">//! minimize the incremental work performed when an update triggers the next `Revision`. Calls to</span>
 <span class="doccomment">//! the memo_\* topological functions will perform memoization specific to the current position</span>
-<span class="doccomment">//! within the function call topology, as other topologically-aware functions do.</span>
+<span class="doccomment">//! within the function call topology, as other topologically-nested functions do.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! During [`run_once`] the memoization storage is an [environment value](topo::Env). Memoization</span>
 <span class="doccomment">//! calls write to this storage to store results. At the end of [run_once], this storage is</span>

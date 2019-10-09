@@ -13,7 +13,7 @@ creating interfaces and attempts to minimize latency and general overhead.</p>
 <p>Memoization is the core tool which moxie provides to store data across <code>Revision</code>s and to
 minimize the incremental work performed when an update triggers the next <code>Revision</code>. Calls to
 the memo_* topological functions will perform memoization specific to the current position
-within the function call topology, as other topologically-aware functions do.</p>
+within the function call topology, as other topologically-nested functions do.</p>
 <p>During [<code>run_once</code>] the memoization storage is an <a href="topo::Env">environment value</a>. Memoization
 calls write to this storage to store results. At the end of <a href="crate::embed::Runtime::run_once">run_once</a>, this storage is
 garbage-collected, dropping values which were not referenced, marking them as live.</p>

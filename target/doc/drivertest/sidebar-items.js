@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["__wbg_test_mini_list_0",""]]});

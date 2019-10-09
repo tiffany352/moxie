@@ -1,6 +1,10 @@
 
 let wasm;
 
+function __wbg_elem_binding0(arg0, arg1) {
+    wasm.__wbg_function_table.get(36)(arg0, arg1);
+}
+
 const heap = new Array(32);
 
 heap.fill(undefined);
@@ -17,11 +21,8 @@ function addHeapObject(obj) {
     heap[idx] = obj;
     return idx;
 }
-function __wbg_elem_binding0(arg0, arg1, arg2) {
+function __wbg_elem_binding1(arg0, arg1, arg2) {
     wasm.__wbg_function_table.get(38)(arg0, arg1, addHeapObject(arg2));
-}
-function __wbg_elem_binding1(arg0, arg1) {
-    wasm.__wbg_function_table.get(32)(arg0, arg1);
 }
 /**
 */
@@ -29,25 +30,7 @@ export function main() {
     wasm.main();
 }
 
-function handleError(e) {
-    wasm.__wbindgen_exn_store(addHeapObject(e));
-}
-
 function getObject(idx) { return heap[idx]; }
-
-let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
-
-let cachegetUint8Memory = null;
-function getUint8Memory() {
-    if (cachegetUint8Memory === null || cachegetUint8Memory.buffer !== wasm.memory.buffer) {
-        cachegetUint8Memory = new Uint8Array(wasm.memory.buffer);
-    }
-    return cachegetUint8Memory;
-}
-
-function getStringFromWasm(ptr, len) {
-    return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
-}
 
 function dropObject(idx) {
     if (idx < 36) return;
@@ -63,6 +46,10 @@ function takeObject(idx) {
 
 function isLikeNone(x) {
     return x === undefined || x === null;
+}
+
+function handleError(e) {
+    wasm.__wbindgen_exn_store(addHeapObject(e));
 }
 
 let WASM_VECTOR_LEN = 0;
@@ -81,6 +68,14 @@ const encodeString = (typeof cachedTextEncoder.encodeInto === 'function'
         written: buf.length
     };
 });
+
+let cachegetUint8Memory = null;
+function getUint8Memory() {
+    if (cachegetUint8Memory === null || cachegetUint8Memory.buffer !== wasm.memory.buffer) {
+        cachegetUint8Memory = new Uint8Array(wasm.memory.buffer);
+    }
+    return cachegetUint8Memory;
+}
 
 function passStringToWasm(arg) {
 
@@ -118,6 +113,12 @@ function getInt32Memory() {
         cachegetInt32Memory = new Int32Array(wasm.memory.buffer);
     }
     return cachegetInt32Memory;
+}
+
+let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+
+function getStringFromWasm(ptr, len) {
+    return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
 }
 
 function debugString(val) {
@@ -2707,19 +2708,21 @@ function init(module) {
     let result;
     const imports = {};
     imports.wbg = {};
-    imports.wbg.__widl_f_set_attribute_Element = function(arg0, arg1, arg2, arg3, arg4) {
-        try {
-            getObject(arg0).setAttribute(getStringFromWasm(arg1, arg2), getStringFromWasm(arg3, arg4));
-        } catch (e) {
-            handleError(e)
+    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
+        takeObject(arg0);
+    };
+    imports.wbg.__wbindgen_cb_drop = function(arg0) {
+        const obj = takeObject(arg0).original;
+        if (obj.cnt-- == 1) {
+            obj.a = 0;
+            return true;
         }
+        const ret = false;
+        return ret;
     };
     imports.wbg.__wbindgen_object_clone_ref = function(arg0) {
         const ret = getObject(arg0);
         return addHeapObject(ret);
-    };
-    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
-        takeObject(arg0);
     };
     imports.wbg.__widl_f_first_child_Node = function(arg0) {
         const ret = getObject(arg0).firstChild;
@@ -2737,6 +2740,24 @@ function init(module) {
             handleError(e)
         }
     };
+    imports.wbg.__widl_f_target_Event = function(arg0) {
+        const ret = getObject(arg0).target;
+        return isLikeNone(ret) ? 0 : addHeapObject(ret);
+    };
+    imports.wbg.__widl_instanceof_HTMLInputElement = function(arg0) {
+        const ret = getObject(arg0) instanceof HTMLInputElement;
+        return ret;
+    };
+    imports.wbg.__widl_f_value_HTMLInputElement = function(arg0, arg1) {
+        const ret = getObject(arg1).value;
+        const ret0 = passStringToWasm(ret);
+        const ret1 = WASM_VECTOR_LEN;
+        getInt32Memory()[arg0 / 4 + 0] = ret0;
+        getInt32Memory()[arg0 / 4 + 1] = ret1;
+    };
+    imports.wbg.__widl_f_set_value_HTMLInputElement = function(arg0, arg1, arg2) {
+        getObject(arg0).value = getStringFromWasm(arg1, arg2);
+    };
     imports.wbg.__widl_f_remove_event_listener_with_callback_EventTarget = function(arg0, arg1, arg2, arg3) {
         try {
             getObject(arg0).removeEventListener(getStringFromWasm(arg1, arg2), getObject(arg3));
@@ -2744,18 +2765,17 @@ function init(module) {
             handleError(e)
         }
     };
-    imports.wbg.__wbindgen_cb_drop = function(arg0) {
-        const obj = takeObject(arg0).original;
-        if (obj.cnt-- == 1) {
-            obj.a = 0;
-            return true;
-        }
-        const ret = false;
+    imports.wbg.__widl_f_document_Window = function(arg0) {
+        const ret = getObject(arg0).document;
+        return isLikeNone(ret) ? 0 : addHeapObject(ret);
+    };
+    imports.wbg.__widl_instanceof_Element = function(arg0) {
+        const ret = getObject(arg0) instanceof Element;
         return ret;
     };
-    imports.wbg.__widl_f_add_event_listener_with_callback_EventTarget = function(arg0, arg1, arg2, arg3) {
+    imports.wbg.__widl_f_set_attribute_Element = function(arg0, arg1, arg2, arg3, arg4) {
         try {
-            getObject(arg0).addEventListener(getStringFromWasm(arg1, arg2), getObject(arg3));
+            getObject(arg0).setAttribute(getStringFromWasm(arg1, arg2), getStringFromWasm(arg3, arg4));
         } catch (e) {
             handleError(e)
         }
@@ -2770,25 +2790,6 @@ function init(module) {
         const ret1 = WASM_VECTOR_LEN;
         getInt32Memory()[arg0 / 4 + 0] = ret0;
         getInt32Memory()[arg0 / 4 + 1] = ret1;
-    };
-    imports.wbg.__widl_f_request_animation_frame_Window = function(arg0, arg1) {
-        try {
-            const ret = getObject(arg0).requestAnimationFrame(getObject(arg1));
-            return ret;
-        } catch (e) {
-            handleError(e)
-        }
-    };
-    imports.wbg.__widl_f_cancel_animation_frame_Window = function(arg0, arg1) {
-        try {
-            getObject(arg0).cancelAnimationFrame(arg1);
-        } catch (e) {
-            handleError(e)
-        }
-    };
-    imports.wbg.__widl_f_document_Window = function(arg0) {
-        const ret = getObject(arg0).document;
-        return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
     imports.wbg.__widl_f_append_child_Node = function(arg0, arg1) {
         try {
@@ -2810,6 +2811,13 @@ function init(module) {
             handleError(e)
         }
     };
+    imports.wbg.__widl_f_cancel_animation_frame_Window = function(arg0, arg1) {
+        try {
+            getObject(arg0).cancelAnimationFrame(arg1);
+        } catch (e) {
+            handleError(e)
+        }
+    };
     imports.wbg.__widl_f_create_element_Document = function(arg0, arg1, arg2) {
         try {
             const ret = getObject(arg0).createElement(getStringFromWasm(arg1, arg2));
@@ -2822,6 +2830,21 @@ function init(module) {
         const ret = getObject(arg0).createTextNode(getStringFromWasm(arg1, arg2));
         return addHeapObject(ret);
     };
+    imports.wbg.__widl_f_add_event_listener_with_callback_EventTarget = function(arg0, arg1, arg2, arg3) {
+        try {
+            getObject(arg0).addEventListener(getStringFromWasm(arg1, arg2), getObject(arg3));
+        } catch (e) {
+            handleError(e)
+        }
+    };
+    imports.wbg.__widl_f_request_animation_frame_Window = function(arg0, arg1) {
+        try {
+            const ret = getObject(arg0).requestAnimationFrame(getObject(arg1));
+            return ret;
+        } catch (e) {
+            handleError(e)
+        }
+    };
     imports.wbg.__widl_f_remove_attribute_Element = function(arg0, arg1, arg2) {
         try {
             getObject(arg0).removeAttribute(getStringFromWasm(arg1, arg2));
@@ -2832,24 +2855,6 @@ function init(module) {
     imports.wbg.__widl_f_body_Document = function(arg0) {
         const ret = getObject(arg0).body;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
-    };
-    imports.wbg.__widl_f_target_Event = function(arg0) {
-        const ret = getObject(arg0).target;
-        return isLikeNone(ret) ? 0 : addHeapObject(ret);
-    };
-    imports.wbg.__widl_instanceof_HTMLInputElement = function(arg0) {
-        const ret = getObject(arg0) instanceof HTMLInputElement;
-        return ret;
-    };
-    imports.wbg.__widl_f_value_HTMLInputElement = function(arg0, arg1) {
-        const ret = getObject(arg1).value;
-        const ret0 = passStringToWasm(ret);
-        const ret1 = WASM_VECTOR_LEN;
-        getInt32Memory()[arg0 / 4 + 0] = ret0;
-        getInt32Memory()[arg0 / 4 + 1] = ret1;
-    };
-    imports.wbg.__widl_f_set_value_HTMLInputElement = function(arg0, arg1, arg2) {
-        getObject(arg0).value = getStringFromWasm(arg1, arg2);
     };
     imports.wbg.__widl_instanceof_Event = function(arg0) {
         const ret = getObject(arg0) instanceof Event;
@@ -2940,16 +2945,16 @@ function init(module) {
     imports.wbg.__widl_f_warn_1_ = function(arg0) {
         console.warn(getObject(arg0));
     };
-    imports.wbg.__wbindgen_closure_wrapper92 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper394 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = (arg0) => {
             state.cnt++;
             const a = state.a;
             state.a = 0;
             try {
-                return __wbg_elem_binding0(a, state.b, arg0);
+                return __wbg_elem_binding1(a, state.b, arg0);
             } finally {
-                if (--state.cnt === 0) wasm.__wbg_function_table.get(33)(a, state.b);
+                if (--state.cnt === 0) wasm.__wbg_function_table.get(37)(a, state.b);
                 else state.a = a;
             }
         }
@@ -2958,16 +2963,16 @@ function init(module) {
         const ret = real;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper344 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper413 = function(arg0, arg1, arg2) {
         const state = { a: arg0, b: arg1, cnt: 1 };
         const real = () => {
             state.cnt++;
             const a = state.a;
             state.a = 0;
             try {
-                return __wbg_elem_binding1(a, state.b, );
+                return __wbg_elem_binding0(a, state.b, );
             } finally {
-                if (--state.cnt === 0) wasm.__wbg_function_table.get(33)(a, state.b);
+                if (--state.cnt === 0) wasm.__wbg_function_table.get(37)(a, state.b);
                 else state.a = a;
             }
         }

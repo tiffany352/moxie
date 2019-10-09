@@ -740,13 +740,46 @@
 <span id="740">740</span>
 <span id="741">741</span>
 <span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">forbid</span>(<span class="ident">unsafe_code</span>)]</span>
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">clippy</span>::<span class="ident">all</span>, <span class="ident">missing_docs</span>, <span class="ident">intra_doc_link_resolution_failure</span>)]</span>
 
 <span class="doccomment">//! `topo` creates a hierarchy of scoped, nested [environments][topo::Env] whose shape matches the</span>
 <span class="doccomment">//! function callgraph. These environments store singletons indexed by their type, and references to</span>
-<span class="doccomment">//! environmental values are available only to an enclosed call scope. When a `#![topo::aware]`</span>
+<span class="doccomment">//! environmental values are available only to an enclosed call scope. When a `#![topo::nested]`</span>
 <span class="doccomment">//! function is called, its parent environment is cheaply propagated along with any additional</span>
 <span class="doccomment">//! values added at appropriate callsites.</span>
 <span class="doccomment">//!</span>
@@ -755,21 +788,21 @@
 <span class="doccomment">//! the path taken through the callgraph to the current location, and are stable across repeated</span>
 <span class="doccomment">//! invocations of the same execution paths.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! By running the same topologically-aware functions in a loop, we can observe changes to the</span>
+<span class="doccomment">//! By running the same topologically-nested functions in a loop, we can observe changes to the</span>
 <span class="doccomment">//! structure over time. The [moxie](https://docs.rs/moxie) crate uses these identifiers and</span>
 <span class="doccomment">//! environments to create persistent trees for rendering human interfaces.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! # Making functions aware of the call topology</span>
+<span class="doccomment">//! # Making functions nested within the call topology</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Defining a topological function results in a macro definition for binding the</span>
-<span class="doccomment">//! function to each callsite where it is invoked. Define a topologically-aware function with the</span>
-<span class="doccomment">//! `topo::aware` attribute:</span>
+<span class="doccomment">//! function to each callsite where it is invoked. Define a topologically-nested function with the</span>
+<span class="doccomment">//! `topo::nested` attribute:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! #[topo::aware]</span>
+<span class="doccomment">//! #[topo::nested]</span>
 <span class="doccomment">//! fn basic_topo() -&gt; topo::Id { topo::Id::current() }</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! #[topo::aware]</span>
+<span class="doccomment">//! #[topo::nested]</span>
 <span class="doccomment">//! fn tier_two() -&gt; topo::Id { basic_topo!() }</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // each of these functions will be run in separately identified</span>
@@ -787,11 +820,44 @@
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Because topological functions must be sensitive to the location at which they&#39;re invoked and</span>
-<span class="doccomment">//! aware of their parent, we transform the function definition into a macro to track the source</span>
-<span class="doccomment">//! location at which it is called. Future language features may make it possible to call topo-aware</span>
-<span class="doccomment">//! functions without any special syntax.</span>
+<span class="doccomment">//! within their immediate parent, we transform the function definition into a macro to track the</span>
+<span class="doccomment">//! source location at which it is called. Future language features may make it possible to call</span>
+<span class="doccomment">//! topo-nested functions without any special syntax.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Requiring references from the environment</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The `from_env` macro provides an attribute for functions that require access to a singleton in</span>
+<span class="doccomment">//! their environment. Here, the contrived function requires a `u8` to add one to:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//! #[topo::from_env(num: &amp;u8)]</span>
+<span class="doccomment">//! fn env_num_plus_one() -&gt; u8 {</span>
+<span class="doccomment">//!     num + 1</span>
+<span class="doccomment">//! }</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! topo::Env::add(1u8);</span>
+<span class="doccomment">//! assert_eq!(env_num_plus_one(), 2u8);</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This provides convenient sugar for values stored in the current `Env` as an alternative to</span>
+<span class="doccomment">//! thread-locals or a manually propagated context object. However this approach incurs a</span>
+<span class="doccomment">//! significant cost in that the following code will panic without the right type having been added</span>
+<span class="doccomment">//! to the environment:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```should_panic</span>
+<span class="doccomment">//! # #[topo::from_env(num: &amp;u8)]</span>
+<span class="doccomment">//! # fn env_num_plus_one() -&gt; u8 {</span>
+<span class="doccomment">//! #    num + 1</span>
+<span class="doccomment">//! # }</span>
+<span class="doccomment">//! // thread &#39;main&#39; panicked at &#39;expected a value from the environment, found none&#39;</span>
+<span class="doccomment">//! env_num_plus_one();</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! See the attribute&#39;s documentation for more details, and please consider whether this is</span>
+<span class="doccomment">//! appropriate for your use case before taking it on as a dependency.</span>
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">topo_macro</span>::{<span class="ident">aware</span>, <span class="ident">from_env</span>};
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">topo_macro</span>::{<span class="ident">from_env</span>, <span class="ident">nested</span>};
 
 <span class="kw">use</span> {
     <span class="ident">owning_ref</span>::<span class="ident">OwningRef</span>,
@@ -828,7 +894,7 @@
     }};
 }
 
-<span class="doccomment">/// Calls the provided expression within an [`Env`] aware to the callsite, optionally passing</span>
+<span class="doccomment">/// Calls the provided expression with an [`Id`] specific to the callsite, optionally passing</span>
 <span class="doccomment">/// additional environment values to the child scope.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
@@ -996,8 +1062,8 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// The `Id` for the execution of a stack frame is the combined product of:</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// * a callsite: lexical source location at which the topologically-aware function was invoked</span>
-<span class="doccomment">/// * parent `Id`: the identifier which was active when entering the current topo-aware function</span>
+<span class="doccomment">/// * a callsite: lexical source location at which the topologically-nested function was invoked</span>
+<span class="doccomment">/// * parent `Id`: the identifier which was active when entering the current topo-nested function</span>
 <span class="doccomment">/// * a &quot;slot&quot;: runtime value indicating the call&#39;s &quot;logical index&quot; within the parent call</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// By default, the slot used is a count of the number of times that particular callsite has been</span>

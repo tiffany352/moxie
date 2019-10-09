@@ -221,30 +221,36 @@
 <span id="221">221</span>
 <span id="222">222</span>
 <span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Tools for declaratively constructing and incrementally updating HTML DOM trees on the web. Based</span>
 <span class="doccomment">//! on the [`moxie`] UI runtime.</span>
 
-<span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>, <span class="ident">intra_doc_link_resolution_failure</span>)]</span>
+<span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>, <span class="ident">intra_doc_link_resolution_failure</span>)]</span>
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">moxie</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use</span> {
-    <span class="kw">crate</span>::{
-        <span class="ident">embed</span>::<span class="ident">WebRuntime</span>,
+    <span class="ident">augdom</span>::{
         <span class="ident">event</span>::{<span class="ident">Event</span>, <span class="ident">EventHandle</span>},
+        <span class="ident">Node</span>,
     },
     <span class="ident">moxie</span>,
     <span class="ident">std</span>::<span class="ident">cell</span>::<span class="ident">Cell</span>,
-    <span class="ident">tracing</span>::<span class="kw-2">*</span>,
 };
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">elements</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">embed</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">event</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">web_sys</span> <span class="kw">as</span> <span class="ident">sys</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;webdom&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">augdom</span>::<span class="ident">sys</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">augdom</span>::{<span class="ident">event</span>, <span class="kw-2">*</span>};
 
 <span class="doccomment">/// The &quot;boot sequence&quot; for a moxie-dom instance creates a [crate::embed::WebRuntime] with the</span>
 <span class="doccomment">/// provided arguments and begins scheduling its execution with `requestAnimationFrame` on state</span>
@@ -257,33 +263,44 @@
 <span class="doccomment">/// [`WebRuntime`](crate::embed::WebRuntime) and begins scheduling it with an</span>
 <span class="doccomment">/// [`AnimationFrameScheduler`](crate::embed::AnimationFrameScheduler) which requests an animation</span>
 <span class="doccomment">/// frame only when there are updates to state variables.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">boot</span>(<span class="ident">new_parent</span>: <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">sys</span>::<span class="ident">Element</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>, <span class="ident">root</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>() <span class="op">+</span> <span class="lifetime">&#39;static</span>) {
-    <span class="ident">WebRuntime</span>::<span class="ident">new</span>(<span class="ident">new_parent</span>.<span class="ident">as_ref</span>().<span class="ident">to_owned</span>(), <span class="ident">root</span>)
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;webdom&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">boot</span>(<span class="ident">new_parent</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Node</span><span class="op">&gt;</span>, <span class="ident">root</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>() <span class="op">+</span> <span class="lifetime">&#39;static</span>) {
+    <span class="ident">embed</span>::<span class="ident">WebRuntime</span>::<span class="ident">new</span>(<span class="ident">new_parent</span>.<span class="ident">into</span>(), <span class="ident">root</span>)
         .<span class="ident">animation_frame_scheduler</span>()
-        .<span class="ident">run_on_state_changes</span>();
+        .<span class="ident">run_on_wake</span>();
 }
 
-<span class="doccomment">/// Returns the current window. Panics if no window is available.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">window</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sys</span>::<span class="ident">Window</span> {
-    <span class="ident">sys</span>::<span class="ident">window</span>().<span class="ident">expect</span>(<span class="string">&quot;must run from within a `window`&quot;</span>)
-}
-
-<span class="doccomment">/// Returns the current document. Panics if called outside a web document context.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">document</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sys</span>::<span class="ident">Document</span> {
-    <span class="ident">window</span>()
-        .<span class="ident">document</span>()
-        .<span class="ident">expect</span>(<span class="string">&quot;must run from within a `window` with a valid `document`&quot;</span>)
+<span class="doccomment">/// Runs the provided closure once and produces a prettified HTML string from the contents.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// If you need more control over the output of the HTML, see the implementation of this function.</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rsdom&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">render_html</span>(<span class="ident">root</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>() <span class="op">+</span> <span class="lifetime">&#39;static</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+    <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">tester</span>, <span class="ident">root</span>) <span class="op">=</span> <span class="ident">embed</span>::<span class="ident">WebRuntime</span>::<span class="ident">in_rsdom_div</span>(<span class="ident">root</span>);
+    <span class="ident">tester</span>.<span class="ident">run_once</span>();
+    <span class="kw">let</span> <span class="ident">outer</span> <span class="op">=</span> <span class="ident">augdom</span>::<span class="ident">Node</span>::<span class="ident">Virtual</span>(<span class="ident">root</span>).<span class="ident">pretty_outer_html</span>(<span class="number">2</span>);
+    <span class="comment">// because we use the indented version, we know that only at the top and bottom is what we want</span>
+    <span class="ident">outer</span>
+        .<span class="ident">lines</span>()
+        .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">l</span> <span class="op">!</span><span class="op">=</span> <span class="string">&quot;&lt;div&gt;&quot;</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="kw-2">*</span><span class="ident">l</span> <span class="op">!</span><span class="op">=</span> <span class="string">&quot;&lt;/div&gt;&quot;</span>)
+        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="ident">l</span>.<span class="ident">split_at</span>(<span class="number">2</span>).<span class="number">1</span>)
+        .<span class="ident">fold</span>(<span class="ident">String</span>::<span class="ident">new</span>(), <span class="op">|</span><span class="kw-2">mut</span> <span class="ident">fragment</span>, <span class="ident">line</span><span class="op">|</span> {
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">fragment</span>.<span class="ident">is_empty</span>() {
+                <span class="ident">fragment</span>.<span class="ident">push</span>(<span class="string">&#39;\n&#39;</span>);
+            }
+            <span class="ident">fragment</span>.<span class="ident">push_str</span>(<span class="ident">line</span>);
+            <span class="ident">fragment</span>
+        })
 }
 
 <span class="doccomment">/// Create and mount a [DOM text node](https://developer.mozilla.org/en-US/docs/Web/API/Text).</span>
 <span class="doccomment">/// This is normally called by the [`moxie::mox!`] macro.</span>
-<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
-<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">from_env</span>(<span class="ident">parent</span>: <span class="ident">MemoElement</span>)]</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">nested</span>]</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">from_env</span>(<span class="ident">parent</span>: <span class="kw-2">&amp;</span><span class="ident">MemoElement</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">text</span>(<span class="ident">s</span>: <span class="kw">impl</span> <span class="ident">ToString</span>) {
     <span class="comment">// TODO consider a ToOwned-based memoization API that&#39;s lower level?</span>
     <span class="comment">// memo_ref&lt;Ref, Arg, Output&gt;(reference: Ref, init: impl FnOnce(Arg) -&gt; Output)</span>
     <span class="comment">// where Ref: ToOwned&lt;Owned=Arg&gt; + PartialEq, etcetcetc</span>
-    <span class="kw">let</span> <span class="ident">text_node</span> <span class="op">=</span> <span class="macro">memo</span><span class="macro">!</span>(<span class="ident">s</span>.<span class="ident">to_string</span>(), <span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">document</span>().<span class="ident">create_text_node</span>(<span class="ident">s</span>));
+    <span class="kw">let</span> <span class="ident">text_node</span> <span class="op">=</span> <span class="macro">memo</span><span class="macro">!</span>(<span class="ident">s</span>.<span class="ident">to_string</span>(), <span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">parent</span>.<span class="ident">node</span>.<span class="ident">create_text_node</span>(<span class="ident">s</span>));
     <span class="ident">parent</span>.<span class="ident">ensure_child_attached</span>(<span class="kw-2">&amp;</span><span class="ident">text_node</span>);
 }
 
@@ -296,33 +313,33 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Mutation of the created element is performed during the `with_elem` closure via the provided</span>
 <span class="doccomment">/// [`moxie_dom::MemoElement`] wrapper.</span>
-<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">aware</span>]</span>
-<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">from_env</span>(<span class="ident">parent</span>: <span class="ident">MemoElement</span>)]</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">nested</span>]</span>
+<span class="attribute">#[<span class="ident">topo</span>::<span class="ident">from_env</span>(<span class="ident">parent</span>: <span class="kw-2">&amp;</span><span class="ident">MemoElement</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">element</span><span class="op">&lt;</span><span class="ident">ChildRet</span><span class="op">&gt;</span>(
     <span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
     <span class="ident">with_elem</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">MemoElement</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ChildRet</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ChildRet</span> {
-    <span class="kw">let</span> <span class="ident">elem</span> <span class="op">=</span> <span class="macro">memo</span><span class="macro">!</span>(<span class="ident">ty</span>, <span class="op">|</span><span class="ident">ty</span><span class="op">|</span> <span class="ident">document</span>().<span class="ident">create_element</span>(<span class="ident">ty</span>).<span class="ident">unwrap</span>());
+    <span class="kw">let</span> <span class="ident">elem</span> <span class="op">=</span> <span class="macro">memo</span><span class="macro">!</span>(<span class="ident">ty</span>, <span class="op">|</span><span class="ident">ty</span><span class="op">|</span> <span class="ident">parent</span>.<span class="ident">node</span>.<span class="ident">create_element</span>(<span class="ident">ty</span>));
     <span class="ident">parent</span>.<span class="ident">ensure_child_attached</span>(<span class="kw-2">&amp;</span><span class="ident">elem</span>);
-    <span class="kw">let</span> <span class="ident">elem</span> <span class="op">=</span> <span class="ident">MemoElement</span>::<span class="ident">new</span>(<span class="ident">elem</span>);
+    <span class="kw">let</span> <span class="ident">elem</span> <span class="op">=</span> <span class="ident">MemoElement</span>::<span class="ident">new</span>(<span class="ident">elem</span>.<span class="ident">into</span>());
     <span class="ident">with_elem</span>(<span class="kw-2">&amp;</span><span class="ident">elem</span>)
 }
 
-<span class="doccomment">/// A topologically-aware &quot;incremental smart pointer&quot; for an HTML element.</span>
+<span class="doccomment">/// A topologically-nested &quot;incremental smart pointer&quot; for an HTML element.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Created during execution of the (element) macro and the element-specific wrappers. Offers a</span>
 <span class="doccomment">/// &quot;stringly-typed&quot; API for mutating the contained DOM nodes, adhering fairly closely to the</span>
 <span class="doccomment">/// upstream web specs.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MemoElement</span> {
-    <span class="ident">curr</span>: <span class="ident">Cell</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">sys</span>::<span class="ident">Node</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">elem</span>: <span class="ident">sys</span>::<span class="ident">Element</span>,
+    <span class="ident">curr</span>: <span class="ident">Cell</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Node</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">node</span>: <span class="ident">Node</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">MemoElement</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">elem</span>: <span class="ident">sys</span>::<span class="ident">Element</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">node</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">curr</span>: <span class="ident">Cell</span>::<span class="ident">new</span>(<span class="prelude-val">None</span>),
-            <span class="ident">elem</span>,
+            <span class="ident">node</span>,
         }
     }
 
@@ -336,11 +353,11 @@
     <span class="doccomment">/// so the tools for memoization are important for keeping your application responsive. If you</span>
     <span class="doccomment">/// have legitimate needs for this API, please consider filing an issue with your use case so</span>
     <span class="doccomment">/// the maintainers of this crate can consider &quot;official&quot; ways to support it.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">raw_element_that_has_sharp_edges_please_be_careful</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sys</span>::<span class="ident">Element</span> {
-        <span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">clone</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">raw_node_that_has_sharp_edges_please_be_careful</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Node</span> {
+        <span class="self">self</span>.<span class="ident">node</span>.<span class="ident">clone</span>()
     }
 
-    <span class="comment">// FIXME this should be topo-aware</span>
+    <span class="comment">// FIXME this should be topo-nested</span>
     <span class="comment">// TODO and it should be able to express its slot as an annotation</span>
     <span class="doccomment">/// Declare an attribute of the element, mutating the actual element&#39;s attribute when the passed</span>
     <span class="doccomment">/// value changes.</span>
@@ -353,10 +370,8 @@
             <span class="macro">memo_with</span><span class="macro">!</span>(
                 <span class="ident">value</span>.<span class="ident">to_string</span>(),
                 <span class="op">|</span><span class="ident">v</span><span class="op">|</span> {
-                    <span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">set_attribute</span>(<span class="ident">name</span>, <span class="ident">v</span>).<span class="ident">unwrap</span>();
-                    <span class="ident">scopeguard</span>::<span class="ident">guard</span>(<span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">clone</span>(), <span class="kw">move</span> <span class="op">|</span><span class="ident">elem</span><span class="op">|</span> {
-                        <span class="ident">elem</span>.<span class="ident">remove_attribute</span>(<span class="ident">name</span>).<span class="ident">unwrap</span>()
-                    })
+                    <span class="self">self</span>.<span class="ident">node</span>.<span class="ident">set_attribute</span>(<span class="ident">name</span>, <span class="ident">v</span>);
+                    <span class="ident">scopeguard</span>::<span class="ident">guard</span>(<span class="self">self</span>.<span class="ident">node</span>.<span class="ident">clone</span>(), <span class="kw">move</span> <span class="op">|</span><span class="ident">elem</span><span class="op">|</span> <span class="ident">elem</span>.<span class="ident">remove_attribute</span>(<span class="ident">name</span>))
                 },
                 <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {}
             )
@@ -364,7 +379,7 @@
         <span class="self">self</span>
     }
 
-    <span class="comment">// FIXME this should be topo-aware</span>
+    <span class="comment">// FIXME this should be topo-nested</span>
     <span class="doccomment">/// Declare an event handler on the element.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// A guard value is stored as a resulting &quot;effect&quot; of the mutation, and removes the attribute</span>
@@ -380,40 +395,37 @@
         <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(<span class="ident">slot</span>: <span class="ident">Ev</span>::<span class="ident">NAME</span>, {
             <span class="macro">memo_with</span><span class="macro">!</span>(
                 <span class="ident">moxie</span>::<span class="ident">embed</span>::<span class="ident">Revision</span>::<span class="ident">current</span>(),
-                <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">sys</span>::<span class="ident">EventTarget</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">as_ref</span>();
-                    <span class="ident">EventHandle</span>::<span class="ident">new</span>(<span class="ident">target</span>.<span class="ident">clone</span>(), <span class="ident">callback</span>)
-                },
+                <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">EventHandle</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">node</span>, <span class="ident">callback</span>),
                 <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {}
             );
         });
         <span class="self">self</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">ensure_child_attached</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">new_child</span>: <span class="kw-2">&amp;</span><span class="ident">sys</span>::<span class="ident">Node</span>) {
+    <span class="kw">fn</span> <span class="ident">ensure_child_attached</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">new_child</span>: <span class="kw-2">&amp;</span><span class="ident">Node</span>) {
         <span class="kw">let</span> <span class="ident">prev_sibling</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">curr</span>.<span class="ident">replace</span>(<span class="prelude-val">Some</span>(<span class="ident">new_child</span>.<span class="ident">clone</span>()));
 
         <span class="kw">let</span> <span class="ident">existing</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">prev_sibling</span>.<span class="ident">is_none</span>() {
-            <span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">first_child</span>()
+            <span class="self">self</span>.<span class="ident">node</span>.<span class="ident">first_child</span>()
         } <span class="kw">else</span> {
             <span class="ident">prev_sibling</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">next_sibling</span>())
         };
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">existing</span>) <span class="op">=</span> <span class="ident">existing</span> {
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">existing</span>.<span class="ident">is_same_node</span>(<span class="prelude-val">Some</span>(<span class="ident">new_child</span>)) {
-                <span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">replace_child</span>(<span class="ident">new_child</span>, <span class="kw-2">&amp;</span><span class="ident">existing</span>).<span class="ident">unwrap</span>();
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">existing</span>) <span class="op">=</span> <span class="ident">existing</span> {
+            <span class="kw">if</span> <span class="ident">existing</span> <span class="op">!</span><span class="op">=</span> <span class="ident">new_child</span> {
+                <span class="self">self</span>.<span class="ident">node</span>.<span class="ident">replace_child</span>(<span class="ident">new_child</span>, <span class="ident">existing</span>);
             }
         } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">append_child</span>(<span class="ident">new_child</span>).<span class="ident">unwrap</span>();
+            <span class="self">self</span>.<span class="ident">node</span>.<span class="ident">append_child</span>(<span class="ident">new_child</span>);
         }
     }
 
     <span class="doccomment">/// Declare the inner contents of the element, usually declaring children within the inner</span>
     <span class="doccomment">/// scope. After any children have been run and their nodes attached, this clears any trailing</span>
     <span class="doccomment">/// child nodes to ensure the element&#39;s children are correct per the latest declaration.</span>
-    <span class="comment">// FIXME this should be topo-aware</span>
+    <span class="comment">// FIXME this should be topo-nested</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inner</span><span class="op">&lt;</span><span class="ident">Ret</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">children</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ret</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ret</span> {
-        <span class="kw">let</span> <span class="ident">elem</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">elem</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">node</span>.<span class="ident">clone</span>();
         <span class="kw">let</span> <span class="ident">last_desired_child</span>;
         <span class="kw">let</span> <span class="ident">ret</span>;
         <span class="ident">topo</span>::<span class="macro">call</span><span class="macro">!</span>(
@@ -425,7 +437,7 @@
                 <span class="ident">last_desired_child</span> <span class="op">=</span> <span class="ident">topo</span>::<span class="ident">Env</span>::<span class="ident">expect</span>::<span class="op">&lt;</span><span class="ident">MemoElement</span><span class="op">&gt;</span>().<span class="ident">curr</span>.<span class="ident">replace</span>(<span class="prelude-val">None</span>);
             },
             <span class="macro">env</span><span class="macro">!</span> {
-                <span class="ident">MemoElement</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MemoElement</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">elem</span>.<span class="ident">clone</span>()),
+                <span class="ident">MemoElement</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MemoElement</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">node</span>.<span class="ident">clone</span>()),
             }
         );
 

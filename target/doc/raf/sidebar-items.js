@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["AnimationFrameScheduler","Owns a `WebRuntime` and schedules its execution using `requestAnimationFrame`."]],"trait":[["Tick","A value which can be mutably called by the scheduler."],["Waking","A value which can receive a waker from the scheduler that will request a new frame when woken."]]});
