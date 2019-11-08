@@ -27,16 +27,16 @@
 //! fn basic_topo() -> topo::Id { topo::Id::current() }
 //!
 //! #[topo::nested]
-//! fn tier_two() -> topo::Id { basic_topo!() }
+//! fn tier_two() -> topo::Id { basic_topo() }
 //!
 //! // each of these functions will be run in separately identified
 //! // contexts as the source locations for their calls are different
-//! let first = basic_topo!();
-//! let second = basic_topo!();
+//! let first = basic_topo();
+//! let second = basic_topo();
 //! assert_ne!(first, second);
 //!
-//! let third = tier_two!();
-//! let fourth = tier_two!();
+//! let third = tier_two();
+//! let fourth = tier_two();
 //! assert_ne!(third, fourth);
 //! assert_ne!(first, third);
 //! assert_ne!(first, fourth);
@@ -560,32 +560,6 @@ impl Env {
             inner: Rc::new(new),
         }
     }
-}
-
-/// Defines a new macro (named after the first metavariable) which calls a function (named in
-/// the second metavariable) in a `Point` specific to this callsite and its parents.
-///
-/// As a quirk of the `macro_rules!` parser, we have to "bring our own" metavariables for the new
-/// macro's args and their expansion for the wrapped function. This makes for an awkward invocation,
-/// but it's only invoked from the proc macro attribute for generating topological macros.
-///
-/// This is used to work around procedural macro hygiene restrictions, allowing us to "generate" a
-/// macro from a procedural macro without needing to enable a (as of writing) unstable feature.
-#[doc(hidden)]
-#[macro_export]
-macro_rules! unstable_make_topo_macro {
-    (
-        $name:ident $mangled_name:ident
-        match $matcher:tt
-        subst $pass:tt
-        doc ($($docs:tt)*)
-    ) => {
-        $($docs)*
-        #[macro_export]
-        macro_rules! $name {
-            $matcher => { topo::call!({ $mangled_name $pass }) };
-        }
-    };
 }
 
 /// Declare additional environment values to expose to a child topological function's call tree.

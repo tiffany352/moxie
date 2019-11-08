@@ -1,3 +1,6 @@
+//! State variables are memoized values that can be updated, signalling the runtime that a new
+//! Revision should be executed.
+
 use {
     crate::{embed::RunLoopWaker, memo::*},
     parking_lot::Mutex,
@@ -44,7 +47,16 @@ impl<State> Var<State> {
 }
 
 /// Root a state variable at this callsite, returning a [`Key`] to the state variable.
-/// Re-initializes the state variable if the capture argument changes.
+pub fn state<Init, Output>(initializer: Init) -> Key<Output>
+where
+    Output: 'static,
+    Init: FnOnce() -> Output,
+{
+    memo_state((), |&()| initializer())
+}
+
+/// Root a state variable at this callsite, returning a [`Key`] to the state variable.
+/// Re-initializes the state variable if the capture `arg` changes.
 #[topo::nested]
 #[topo::from_env(waker: &RunLoopWaker)]
 pub fn memo_state<Arg, Init, Output>(arg: Arg, initializer: Init) -> Key<Output>
@@ -53,7 +65,7 @@ where
     Output: 'static,
     for<'a> Init: FnOnce(&'a Arg) -> Output,
 {
-    let var = memo!(arg, |a| {
+    let var = memo(arg, |a| {
         let var = Var {
             point: topo::Id::current(),
             current: Commit {
@@ -74,20 +86,6 @@ where
         commit_at_root,
         var,
     }
-}
-
-/// Convenience wrapper around [`memo_state`].
-#[macro_export]
-macro_rules! state {
-    ($arg:expr, $init:expr) => {
-        $crate::memo_state!($arg, $init)
-    };
-    (|| $init:expr) => {
-        $crate::memo_state!((), |()| $init)
-    };
-    () => {
-        $crate::memo_state!((), |()| Default::default())
-    };
 }
 
 /// A read-only pointer to the value of a state variable *at a particular revision*.

@@ -3,24 +3,28 @@
 
 #![deny(missing_docs, intra_doc_link_resolution_failure)]
 
-#[doc(hidden)]
-pub use moxie::*;
-
 use {
     augdom::{
         event::{Event, EventHandle},
-        Node,
+        Dom, Node,
     },
-    moxie,
+    moxie::prelude::*,
     std::cell::Cell,
 };
 
 pub mod elements;
 pub mod embed;
 
-#[cfg(feature = "webdom")]
-pub use augdom::sys;
-pub use augdom::{event, *};
+/// A module for glob-importing the most commonly used moxie-dom items.
+pub mod prelude {
+    #[cfg(feature = "webdom")]
+    pub use augdom::{document, sys};
+    pub use augdom::{event, Dom};
+    pub use moxie::mox;
+    pub use moxie::prelude::*;
+
+    pub use crate::text;
+}
 
 /// The "boot sequence" for a moxie-dom instance creates a [crate::embed::WebRuntime] with the
 /// provided arguments and begins scheduling its execution with `requestAnimationFrame` on state
@@ -70,7 +74,7 @@ pub fn text(s: impl ToString) {
     // TODO consider a ToOwned-based memoization API that's lower level?
     // memo_ref<Ref, Arg, Output>(reference: Ref, init: impl FnOnce(Arg) -> Output)
     // where Ref: ToOwned<Owned=Arg> + PartialEq, etcetcetc
-    let text_node = memo!(s.to_string(), |s| parent.node.create_text_node(s));
+    let text_node = memo(s.to_string(), |s| parent.node.create_text_node(s));
     parent.ensure_child_attached(&text_node);
 }
 
@@ -89,7 +93,7 @@ pub fn element<ChildRet>(
     ty: &'static str,
     with_elem: impl FnOnce(&MemoElement) -> ChildRet,
 ) -> ChildRet {
-    let elem = memo!(ty, |ty| parent.node.create_element(ty));
+    let elem = memo(ty, |ty| parent.node.create_element(ty));
     parent.ensure_child_attached(&elem);
     let elem = MemoElement::new(elem.into());
     with_elem(&elem)
@@ -137,13 +141,13 @@ impl MemoElement {
     /// referenced in the most recent (`moxie::Revision`).
     pub fn attr(&self, name: &'static str, value: impl ToString) -> &Self {
         topo::call!(slot: name, {
-            memo_with!(
+            memo_with(
                 value.to_string(),
                 |v| {
                     self.node.set_attribute(name, v);
                     scopeguard::guard(self.node.clone(), move |elem| elem.remove_attribute(name))
                 },
-                |_| {}
+                |_| {},
             )
         });
         self
@@ -163,10 +167,10 @@ impl MemoElement {
         Ev: 'static + Event,
     {
         topo::call!(slot: Ev::NAME, {
-            memo_with!(
+            memo_with(
                 moxie::embed::Revision::current(),
                 |_| EventHandle::new(&self.node, callback),
-                |_| {}
+                |_| {},
             );
         });
         self

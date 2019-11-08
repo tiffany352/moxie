@@ -1,5 +1,9 @@
 use {
-    moxie_dom::{embed::WebRuntime, *},
+    moxie_dom::{
+        elements::{li, ul},
+        embed::WebRuntime,
+        prelude::*,
+    },
     std::io::prelude::*,
     typed_html::dom::{DOMTree, VNode},
     wasm_bindgen::JsCast,
@@ -40,8 +44,7 @@ fn mini_list() {
 
     assert_vnode_matches_element(&expected, &web_div);
 
-    let expected_html =
-        r#"<div><ul class="listywisty"><li>first</li><li class="item">second</li><li>third</li></ul></div>"#;
+    let expected_html = r#"<div><ul class="listywisty"><li>first</li><li class="item">second</li><li>third</li></ul></div>"#;
 
     assert_eq!(
         sys::Element::outer_html(&web_div),

@@ -65,15 +65,19 @@
 #![forbid(unsafe_code)]
 #![deny(clippy::all, intra_doc_link_resolution_failure, missing_docs)]
 
+pub mod embed;
+pub mod memo;
+pub mod state;
+
 /// TODO figure out where this is actually documented
 #[proc_macro_hack::proc_macro_hack(support_nested)]
 pub use mox::mox;
 
-pub mod embed;
-#[macro_use]
-mod memo;
-mod state;
-
-pub use topo;
-#[doc(inline)]
-pub use {memo::*, state::*};
+/// A module for glob-importing the most commonly used moxie items.
+pub mod prelude {
+    pub use topo;
+    pub use {
+        crate::memo::{memo, memo_with, once, once_with},
+        crate::state::{memo_state, state, Key},
+    };
+}
