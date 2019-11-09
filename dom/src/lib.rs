@@ -2,6 +2,7 @@
 //! on the [`moxie`] UI runtime.
 
 #![deny(missing_docs, intra_doc_link_resolution_failure)]
+#![feature(track_caller)]
 
 use {
     augdom::{

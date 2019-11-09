@@ -1,3 +1,4 @@
+#![feature(core_intrinsics, track_caller)]
 #![forbid(unsafe_code)]
 #![deny(clippy::all, missing_docs, intra_doc_link_resolution_failure)]
 
@@ -96,12 +97,25 @@ pub struct Callsite {
 }
 
 impl Callsite {
-    #[doc(hidden)]
-    pub fn new(location: &'static std::panic::Location<'static>) -> Self {
+    /// Constructs a callsite whose value is unique to the source location at which it is called.
+    #[track_caller]
+    pub fn here() -> Self {
+        let location = std::intrinsics::caller_location();
         Self {
             // the pointer value for a given location is enough to differentiate it from all others
             location: location as *const _ as usize,
         }
+    }
+
+    /// Returns the number of times this callsite has been seen as a child of the current Point.
+    pub fn current_count(&self) -> u32 {
+        Point::with_current(|point| {
+            if let Some(c) = point.state.callsite_counts.get(self) {
+                *c
+            } else {
+                0
+            }
+        })
     }
 }
 
@@ -114,7 +128,7 @@ impl Callsite {
 /// ```
 ///
 /// Adding an `env! { ... }` directive to the macro input will take ownership of provided values
-/// and make them available to the code run in the `Point` created by the invocation.
+/// and make them available to the code run in the `Id` created by the invocation.
 ///
 /// ```
 /// # use topo;
@@ -139,56 +153,40 @@ impl Callsite {
 ///
 /// assert!(topo::Env::get::<Submarine>().is_none());
 /// ```
+#[track_caller]
 pub fn call<R>(op: impl FnOnce() -> R) -> R {
-    unimplemented!()
+    let callsite = Callsite::here();
+    let _entered = Point::enter_child(
+        callsite,
+        callsite.current_count(),
+        Default::default(),
+        false,
+    );
+    op()
 }
 
 /// todo document
-pub fn call_in_env<R>(_add_env: EnvInner, op: impl FnOnce() -> R) -> R {
-    // let callsite = $crate::callsite!();
-    // $crate::unstable_raw_call!(
-    //     callsite: callsite,
-    //     slot: $crate::current_callsite_count(callsite),
-    //     is_root: false,
-    //     call: $($input)*
-    // )
-    unimplemented!()
+#[track_caller]
+pub fn call_in_env<R>(add_env: EnvInner, op: impl FnOnce() -> R) -> R {
+    let callsite = Callsite::here();
+    let _entered = Point::enter_child(callsite, callsite.current_count(), add_env, false);
+    op()
 }
 
 /// todo document
+#[track_caller]
 pub fn call_in_slot<R>(slot: impl Hash, op: impl FnOnce() -> R) -> R {
-    // $crate::unstable_raw_call!(
-    //     callsite: $crate::callsite!(),
-    //     slot: $slot,
-    //     is_root: false,
-    //     call: $($input)*
-    // )
-    unimplemented!()
+    let callsite = Callsite::here();
+    let _entered = Point::enter_child(callsite, slot, Default::default(), false);
+    op()
 }
 
 /// todo document
-pub fn call_in_slot_and_env<R>(slot: impl Hash, _add_env: EnvInner, op: impl FnOnce() -> R) -> R {
-    unimplemented!()
-}
-
-fn call_inner<R>(
-    callsite: Callsite,
-    slot: impl Hash,
-    _add_env: EnvInner,
-    op: impl FnOnce() -> R,
-) -> R {
-    unimplemented!()
-}
-
-/// Returns the number of times this callsite has been seen as a child of the current Point.
-pub fn current_callsite_count(callsite: Callsite) -> u32 {
-    Point::with_current(|point| {
-        if let Some(c) = point.state.callsite_counts.get(&callsite) {
-            *c
-        } else {
-            0
-        }
-    })
+#[track_caller]
+pub fn call_in_slot_and_env<R>(slot: impl Hash, add_env: EnvInner, op: impl FnOnce() -> R) -> R {
+    let callsite = Callsite::here();
+    let _entered = Point::enter_child(callsite, slot, add_env, false);
+    op()
 }
 
 /// Roots a topology at a particular callsite while calling the provided expression with the same
@@ -252,13 +250,16 @@ pub fn current_callsite_count(callsite: Callsite) -> u32 {
 ///     assert_eq!(root_ids.len(), 1);
 /// }
 /// ```
+#[track_caller]
 pub fn call_as_root<R>(op: impl FnOnce() -> R) -> R {
-    unimplemented!()
+    call_as_root_in_env(Default::default(), op)
 }
 
 /// todo document
+#[track_caller]
 pub fn call_as_root_in_env<R>(add_env: EnvInner, op: impl FnOnce() -> R) -> R {
-    unimplemented!()
+    let _entered = Point::enter_child(Callsite::here(), (), add_env, true);
+    op()
 }
 
 /// Identifies an activation record in the current call topology.
@@ -321,10 +322,9 @@ impl Point {
     /// returned guard is live on the stack, we create the tree of indices and environments that
     /// correspond to the topological call tree, exiting the child context when the rooted scope
     /// ends.
-    #[doc(hidden)]
-    pub fn unstable_enter_child(
+    fn enter_child(
         callsite: Callsite,
-        slot: &impl Hash,
+        slot: impl Hash,
         add_env: EnvInner,
         reset_on_drop: bool,
     ) -> impl Drop {
@@ -359,7 +359,7 @@ impl Point {
     }
 
     /// Mark a child Point in the topology.
-    fn child(&mut self, callsite: Callsite, slot: &impl Hash, additional: EnvInner) -> Self {
+    fn child(&mut self, callsite: Callsite, slot: impl Hash, additional: EnvInner) -> Self {
         let mut hasher = DefaultHasher::new();
         self.id.hash(&mut hasher);
         callsite.hash(&mut hasher);
@@ -385,10 +385,9 @@ impl Point {
 
 impl Default for Point {
     fn default() -> Self {
-        let callsite = unimplemented!();
         Self {
             id: Id(0),
-            callsite,
+            callsite: Callsite { location: 0 },
             state: Default::default(),
         }
     }
