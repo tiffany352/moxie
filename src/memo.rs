@@ -227,7 +227,7 @@ mod tests {
         with_test_logs(|| {
             let mut ids = HashSet::new();
             for _ in 0..10 {
-                topo::call!(ids.insert(topo::Id::current()));
+                topo::call(|| ids.insert(topo::Id::current()));
             }
             assert_eq!(ids.len(), 10);
 
@@ -249,7 +249,7 @@ mod tests {
             let mut rt = Runtime::new(|| {
                 let mut counts = vec![];
                 for i in 0..num_iters {
-                    topo::call!(once(|| counts.push(i)));
+                    topo::call(|| once(|| counts.push(i)));
                 }
                 counts
             });

@@ -25,8 +25,12 @@ fn todo_app() {
     let visibility = state(|| Visibility::default());
     let todos = state(|| vec![Todo::new("whoaaa")]);
 
-    topo::call!(
-        {
+    topo::call_in_env(
+        topo::env! {
+            Key<Vec<Todo>> => todos,
+            Key<Visibility> => visibility
+        },
+        || {
             mox! {
                 <div class="todoapp">
                     <input_header/>
@@ -34,10 +38,6 @@ fn todo_app() {
                 </div>
             }
         },
-        env! {
-            Key<Vec<Todo>> => todos,
-            Key<Visibility> => visibility,
-        }
     );
 }
 

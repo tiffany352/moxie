@@ -140,7 +140,7 @@ impl MemoElement {
     /// when `drop`ped, to ensure that the attribute is removed when this declaration is no longer
     /// referenced in the most recent (`moxie::Revision`).
     pub fn attr(&self, name: &'static str, value: impl ToString) -> &Self {
-        topo::call!(slot: name, {
+        topo::call_in_slot(name, || {
             memo_with(
                 value.to_string(),
                 |v| {
@@ -166,7 +166,7 @@ impl MemoElement {
     where
         Ev: 'static + Event,
     {
-        topo::call!(slot: Ev::NAME, {
+        topo::call_in_slot(Ev::NAME, || {
             memo_with(
                 moxie::embed::Revision::current(),
                 |_| EventHandle::new(&self.node, callback),
@@ -200,20 +200,20 @@ impl MemoElement {
     // FIXME this should be topo-nested
     pub fn inner<Ret>(&self, children: impl FnOnce() -> Ret) -> Ret {
         let elem = self.node.clone();
-        let last_desired_child;
-        let ret;
-        topo::call!(
-            {
-                ret = children();
+        let mut last_desired_child = None;
+        let mut ret = None;
+        topo::call_in_env(
+            topo::env! { MemoElement => MemoElement::new(self.node.clone()) },
+            || {
+                ret = Some(children());
 
                 // before this melement is dropped when the environment goes out of scope,
                 // we need to get the last recorded child from this revision
-                last_desired_child = topo::Env::expect::<MemoElement>().curr.replace(None);
+                last_desired_child = Some(topo::Env::expect::<MemoElement>().curr.replace(None));
             },
-            env! {
-                MemoElement => MemoElement::new(self.node.clone()),
-            }
         );
+        let last_desired_child = last_desired_child.unwrap();
+        let ret = ret.unwrap();
 
         // if there weren't any children declared this revision, we need to make sure we clean up
         // any from the last revision

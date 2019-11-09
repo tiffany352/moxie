@@ -18,9 +18,7 @@
 //!
 //! # Making functions nested within the call topology
 //!
-//! Defining a topological function results in a macro definition for binding the
-//! function to each callsite where it is invoked. Define a topologically-nested function with the
-//! `topo::nested` attribute:
+//! Define a topologically-nested function with the `topo::nested` attribute:
 //!
 //! ```
 //! #[topo::nested]
@@ -42,11 +40,6 @@
 //! assert_ne!(first, fourth);
 //! assert_ne!(second, fourth);
 //! ```
-//!
-//! Because topological functions must be sensitive to the location at which they're invoked and
-//! within their immediate parent, we transform the function definition into a macro to track the
-//! source location at which it is called. Future language features may make it possible to call
-//! topo-nested functions without any special syntax.
 //!
 //! # Requiring references from the environment
 //!
@@ -99,23 +92,17 @@ use {
 /// A value unique to the source location where it is created.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Callsite {
-    ty: TypeId,
+    location: usize,
 }
 
 impl Callsite {
     #[doc(hidden)]
-    pub fn new(ty: TypeId) -> Self {
-        Self { ty }
+    pub fn new(location: &'static std::panic::Location<'static>) -> Self {
+        Self {
+            // the pointer value for a given location is enough to differentiate it from all others
+            location: location as *const _ as usize,
+        }
     }
-}
-
-/// Returns a value unique to the point of its invocation.
-#[macro_export]
-macro_rules! callsite {
-    () => {{
-        struct UwuDaddyRustcGibUniqueTypeIdPlsPls; // thanks for the great name idea, cjm00!
-        $crate::Callsite::new(std::any::TypeId::of::<UwuDaddyRustcGibUniqueTypeIdPlsPls>())
-    }};
 }
 
 /// Calls the provided expression with an [`Id`] specific to the callsite, optionally passing
@@ -123,7 +110,7 @@ macro_rules! callsite {
 ///
 /// ```
 /// let prev = topo::Id::current();
-/// topo::call!(assert_ne!(prev, topo::Id::current()));
+/// topo::call(|| assert_ne!(prev, topo::Id::current()));
 /// ```
 ///
 /// Adding an `env! { ... }` directive to the macro input will take ownership of provided values
@@ -136,10 +123,10 @@ macro_rules! callsite {
 ///
 /// assert!(topo::Env::get::<Submarine>().is_none());
 ///
-/// topo::call!({
+/// topo::call(|| {
 ///     assert_eq!(&Submarine(1), &*topo::Env::get::<Submarine>().unwrap());
 ///
-///     topo::call!({
+///     topo::call(|| {
 ///         assert_eq!(&Submarine(2), &*topo::Env::get::<Submarine>().unwrap());
 ///     }, env! {
 ///         Submarine => Submarine(2),
@@ -152,25 +139,45 @@ macro_rules! callsite {
 ///
 /// assert!(topo::Env::get::<Submarine>().is_none());
 /// ```
-#[macro_export]
-macro_rules! call {
-    (slot: $slot:expr, $($input:tt)*) => {{
-        $crate::unstable_raw_call!(
-            callsite: $crate::callsite!(),
-            slot: $slot,
-            is_root: false,
-            call: $($input)*
-        )
-    }};
-    ($($input:tt)*) => {{
-        let callsite = $crate::callsite!();
-        $crate::unstable_raw_call!(
-            callsite: callsite,
-            slot: $crate::current_callsite_count(callsite),
-            is_root: false,
-            call: $($input)*
-        )
-    }};
+pub fn call<R>(op: impl FnOnce() -> R) -> R {
+    unimplemented!()
+}
+
+/// todo document
+pub fn call_in_env<R>(_add_env: EnvInner, op: impl FnOnce() -> R) -> R {
+    // let callsite = $crate::callsite!();
+    // $crate::unstable_raw_call!(
+    //     callsite: callsite,
+    //     slot: $crate::current_callsite_count(callsite),
+    //     is_root: false,
+    //     call: $($input)*
+    // )
+    unimplemented!()
+}
+
+/// todo document
+pub fn call_in_slot<R>(slot: impl Hash, op: impl FnOnce() -> R) -> R {
+    // $crate::unstable_raw_call!(
+    //     callsite: $crate::callsite!(),
+    //     slot: $slot,
+    //     is_root: false,
+    //     call: $($input)*
+    // )
+    unimplemented!()
+}
+
+/// todo document
+pub fn call_in_slot_and_env<R>(slot: impl Hash, _add_env: EnvInner, op: impl FnOnce() -> R) -> R {
+    unimplemented!()
+}
+
+fn call_inner<R>(
+    callsite: Callsite,
+    slot: impl Hash,
+    _add_env: EnvInner,
+    op: impl FnOnce() -> R,
+) -> R {
+    unimplemented!()
 }
 
 /// Returns the number of times this callsite has been seen as a child of the current Point.
@@ -225,7 +232,7 @@ pub fn current_callsite_count(callsite: Callsite) -> u32 {
 ///         }
 ///
 ///         for i in 0..10 {
-///             topo::call!({
+///             topo::call(|| {
 ///                 let current_id = topo::Id::current();
 ///                 if outer_count > 1 {
 ///                     assert_eq!(child_ids[&i], current_id);
@@ -245,41 +252,13 @@ pub fn current_callsite_count(callsite: Callsite) -> u32 {
 ///     assert_eq!(root_ids.len(), 1);
 /// }
 /// ```
-#[macro_export]
-macro_rules! root {
-    ($($input:tt)*) => {{
-        $crate::unstable_raw_call!(
-            callsite: $crate::callsite!(),
-            slot: (),
-            is_root: true,
-            call: $($input)*
-        )
-    }}
+pub fn call_as_root<R>(op: impl FnOnce() -> R) -> R {
+    unimplemented!()
 }
 
-#[doc(hidden)]
-#[macro_export]
-macro_rules! unstable_raw_call {
-    (
-        callsite: $callsite:expr,
-        slot: $slot:expr,
-        is_root: $is_root:expr,
-        call: $inner:expr
-        $(, env! { $($env:tt)* })?
-    ) => {{
-        #[allow(unused_mut)]
-        let mut _new_env = Default::default();
-        $( _new_env = $crate::env! { $($env)* };  )?
-
-        let _reset_to_parent_on_drop_pls = $crate::Point::unstable_enter_child(
-                $callsite,
-                &$slot,
-                _new_env,
-                $is_root
-        );
-
-        $inner
-    }};
+/// todo document
+pub fn call_as_root_in_env<R>(add_env: EnvInner, op: impl FnOnce() -> R) -> R {
+    unimplemented!()
 }
 
 /// Identifies an activation record in the current call topology.
@@ -406,9 +385,10 @@ impl Point {
 
 impl Default for Point {
     fn default() -> Self {
+        let callsite = unimplemented!();
         Self {
             id: Id(0),
-            callsite: callsite!(),
+            callsite,
             state: Default::default(),
         }
     }
@@ -505,9 +485,7 @@ impl Env {
     /// remainder of the `Env`'s scope.
     pub fn add<E: 'static>(val: E) {
         Point::with_current_mut(|p| {
-            p.state.env = p.state.env.child(env! {
-                E => val,
-            });
+            p.state.env = p.state.env.child(env! { E => val });
         });
     }
 
@@ -565,7 +543,7 @@ impl Env {
 /// Declare additional environment values to expose to a child topological function's call tree.
 #[macro_export]
 macro_rules! env {
-    ($($env_item_ty:ty => $env_item:expr,)*) => {{
+    ($($env_item_ty:ty => $env_item:expr),+) => {{
         #[allow(unused_mut)]
         let mut new_env = std::collections::HashMap::new();
         $( $crate::AnonRc::unstable_new($env_item).unstable_insert_into(&mut new_env); )*
@@ -576,7 +554,7 @@ macro_rules! env {
 #[cfg(test)]
 mod tests {
     use {
-        super::{Env, Id},
+        super::{call, call_as_root, call_as_root_in_env, call_in_env, call_in_slot, Env, Id},
         std::collections::HashSet,
     };
 
@@ -586,9 +564,9 @@ mod tests {
 
         for i in 0..4 {
             if i % 2 == 0 {
-                call!(ids.insert(Id::current()));
+                call(|| ids.insert(Id::current()));
             } else {
-                call!(ids.insert(Id::current()));
+                call(|| ids.insert(Id::current()));
             }
         }
 
@@ -607,8 +585,8 @@ mod tests {
         let mut prev = root;
 
         for _ in 0..100 {
-            let called;
-            call!({
+            let mut called = false;
+            call(|| {
                 let current = Id::current();
                 assert_ne!(prev, current, "each Id in this loop must be unique");
                 prev = current;
@@ -629,10 +607,10 @@ mod tests {
         let slots = vec!["first", "second", "third", "fourth", "fifth"];
 
         let to_call = || {
-            root!({
+            call_as_root(|| {
                 let mut unique_ids = HashSet::new();
                 for s in &slots {
-                    call!(slot: s, {
+                    call_in_slot(s, || {
                         let current = Id::current();
                         unique_ids.insert(current);
                     });
@@ -652,34 +630,24 @@ mod tests {
 
     #[test]
     fn call_env() {
-        let first_called;
-        let second_called;
+        let mut first_called = false;
+        let mut second_called = false;
 
         assert!(Env::get::<u8>().is_none());
-        call!(
-            {
+        call_in_env(env! { u8 => 0u8 }, || {
+            let curr_byte = *Env::expect::<u8>();
+            assert_eq!(curr_byte, 0);
+            first_called = true;
+
+            call_in_env(env! { u8 => 1u8 }, || {
                 let curr_byte = *Env::expect::<u8>();
-                assert_eq!(curr_byte, 0);
-                first_called = true;
+                assert_eq!(curr_byte, 1);
+                second_called = true;
+            });
 
-                call!(
-                    {
-                        let curr_byte = *Env::expect::<u8>();
-                        assert_eq!(curr_byte, 1);
-                        second_called = true;
-                    },
-                    env! {
-                        u8 => 1u8,
-                    }
-                );
-
-                assert!(second_called);
-                assert_eq!(curr_byte, 0);
-            },
-            env! {
-                u8 => 0u8,
-            }
-        );
+            assert!(second_called);
+            assert_eq!(curr_byte, 0);
+        });
         assert!(first_called);
         assert!(Env::get::<u8>().is_none());
     }
@@ -687,30 +655,20 @@ mod tests {
     #[test]
     fn root_sees_parent_env() {
         assert!(Env::get::<u8>().is_none());
-        call!(
-            {
+        call_in_env(env! { u8 => 0u8 }, || {
+            let curr_byte = *Env::expect::<u8>();
+            assert_eq!(curr_byte, 0);
+
+            call_as_root_in_env(env! { u16 => 1u16 }, || {
                 let curr_byte = *Env::expect::<u8>();
-                assert_eq!(curr_byte, 0);
+                assert_eq!(curr_byte, 0, "must see u8 from enclosing environment");
 
-                root!(
-                    {
-                        let curr_byte = *Env::expect::<u8>();
-                        assert_eq!(curr_byte, 0, "must see u8 from enclosing environment");
+                let curr_uh_twobyte = *Env::expect::<u16>();
+                assert_eq!(curr_uh_twobyte, 1, "must see locally installed u16");
+            });
 
-                        let curr_uh_twobyte = *Env::expect::<u16>();
-                        assert_eq!(curr_uh_twobyte, 1, "must see locally installed u16");
-                    },
-                    env! {
-                        u16 => 1u16,
-                    }
-                );
-
-                assert_eq!(curr_byte, 0, "must see 0");
-            },
-            env! {
-                u8 => 0u8,
-            }
-        );
+            assert_eq!(curr_byte, 0, "must see 0");
+        });
         assert!(Env::get::<u8>().is_none());
     }
 
@@ -724,7 +682,7 @@ mod tests {
         Env::add(2u8);
         assert_eq!(*Env::get::<u8>().unwrap(), 2, "just added 2u8");
 
-        call!({
+        call(|| {
             assert_eq!(*Env::get::<u8>().unwrap(), 2, "parent added 2u8");
 
             Env::add(7u8);

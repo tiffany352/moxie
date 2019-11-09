@@ -92,15 +92,22 @@ where
     pub fn run_once(&mut self) -> Out {
         self.revision.0 += 1;
         self.span.record("rev", &self.revision.0);
-        let _entered = self.span.enter();
 
-        let ret = topo::root!(
-            (self.root)(),
-            env! {
-                MemoStore => self.store.clone(),
-                Revision => self.revision,
-                RunLoopWaker => RunLoopWaker(self.wk.clone()),
-            }
+        // bind these up here so we can borrow self.root mutably below
+        let store = self.store.clone();
+        let revision = self.revision;
+        let waker = self.wk.clone();
+        let span = self.span.clone();
+
+        let _entered = span.enter();
+
+        let ret = topo::call_as_root_in_env(
+            topo::env! {
+                MemoStore => store,
+                Revision => revision,
+                RunLoopWaker => RunLoopWaker(waker)
+            },
+            || (self.root)(),
         );
         self.store.gc();
         ret
@@ -141,14 +148,7 @@ mod tests {
         });
 
         assert!(topo::Env::get::<u8>().is_none());
-        topo::call!(
-            {
-                runtime.run_once();
-            },
-            env! {
-                u8 => first_byte,
-            }
-        );
+        topo::call_in_env(topo::env! { u8 => first_byte }, || runtime.run_once());
         assert!(topo::Env::get::<u8>().is_none());
     }
 }
