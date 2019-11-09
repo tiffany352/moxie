@@ -22,6 +22,8 @@
 //! Define a topologically-nested function with the `topo::nested` attribute:
 //!
 //! ```
+//! #![feature(track_caller)]
+//!
 //! #[topo::nested]
 //! fn basic_topo() -> topo::Id { topo::Id::current() }
 //!
@@ -137,19 +139,19 @@ impl Callsite {
 ///
 /// assert!(topo::Env::get::<Submarine>().is_none());
 ///
-/// topo::call(|| {
-///     assert_eq!(&Submarine(1), &*topo::Env::get::<Submarine>().unwrap());
+/// topo::call_in_env(
+///     topo::env! { Submarine => Submarine(1) },
+///     || {
+///         assert_eq!(&Submarine(1), &*topo::Env::get::<Submarine>().unwrap());
 ///
-///     topo::call(|| {
-///         assert_eq!(&Submarine(2), &*topo::Env::get::<Submarine>().unwrap());
-///     }, env! {
-///         Submarine => Submarine(2),
-///     });
+///         topo::call_in_env(
+///             topo::env! { Submarine => Submarine(2) },
+///             || assert_eq!(&Submarine(2), &*topo::Env::get::<Submarine>().unwrap()),
+///         );
 ///
-///     assert_eq!(&Submarine(1), &*topo::Env::get::<Submarine>().unwrap());
-/// }, env! {
-///     Submarine => Submarine(1),
-/// });
+///         assert_eq!(&Submarine(1), &*topo::Env::get::<Submarine>().unwrap());
+///     },
+/// );
 ///
 /// assert!(topo::Env::get::<Submarine>().is_none());
 /// ```
@@ -215,37 +217,38 @@ pub fn call_in_slot_and_env<R>(slot: impl Hash, add_env: EnvInner, op: impl FnOn
 /// let mut child_ids = HashMap::new();
 /// while !exit {
 ///     count += 1;
-///     topo::root!({
-///         root_ids.insert(topo::Id::current());
-///         assert_eq!(
-///             root_ids.len(),
-///             1,
-///             "the Id of this scope should be repeated, not incremented"
-///         );
+///     topo::call_as_root_in_env(
+///         topo::env! { LoopCount => LoopCount(count) },
+///         || {
+///             root_ids.insert(topo::Id::current());
+///             assert_eq!(
+///                 root_ids.len(),
+///                 1,
+///                 "the Id of this scope should be repeated, not incremented"
+///             );
 ///
-///         let outer_count = topo::Env::get::<LoopCount>().unwrap().0;
-///         assert!(outer_count <= 10);
-///         if outer_count == 10 {
-///             exit = true;
-///         }
+///             let outer_count = topo::Env::get::<LoopCount>().unwrap().0;
+///             assert!(outer_count <= 10);
+///             if outer_count == 10 {
+///                 exit = true;
+///             }
 ///
-///         for i in 0..10 {
-///             topo::call(|| {
-///                 let current_id = topo::Id::current();
-///                 if outer_count > 1 {
-///                     assert_eq!(child_ids[&i], current_id);
-///                 }
-///                 child_ids.insert(i, current_id);
-///                 assert!(
-///                     child_ids.len() <= 10,
-///                     "only 10 children should be observed across all loop iterations",
-///                 );
-///             });
-///         }
-///         assert_eq!(child_ids.len(), 10);
-///     }, env! {
-///          LoopCount => LoopCount(count),
-///     });
+///             for i in 0..10 {
+///                 topo::call(|| {
+///                     let current_id = topo::Id::current();
+///                     if outer_count > 1 {
+///                         assert_eq!(child_ids[&i], current_id);
+///                     }
+///                     child_ids.insert(i, current_id);
+///                     assert!(
+///                         child_ids.len() <= 10,
+///                         "only 10 children should be observed across all loop iterations",
+///                     );
+///                 });
+///             }
+///             assert_eq!(child_ids.len(), 10);
+///         },
+///     );
 ///     assert_eq!(child_ids.len(), 10);
 ///     assert_eq!(root_ids.len(), 1);
 /// }
@@ -419,8 +422,8 @@ impl State {
 }
 
 /// Immutable environment container for the current (sub)topology. Environment values can be
-/// provided by parent topological invocations (currently just with [`call`] and
-/// [`root`]), but child functions can only mutate their environment through interior
+/// provided by parent topological invocations (currently just with [`call_in_env`] and
+/// [`call_as_root_in_env`]), but child functions can only mutate their environment through interior
 /// mutability.
 ///
 /// The environment is type-indexed/type-directed, and each `Env` holds 0-1 instances

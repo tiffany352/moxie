@@ -33,6 +33,7 @@ webdom = ["augdom/webdom", "raf"]
 augdom = { path = "augdom", version = "0.1.0-pre" }
 moxie = { path = "../", version = "0.1.1-alpha.0" }
 scopeguard = "1"
+topo = { path = "../topo", version = "0.9.0-pre" }
 
 # web-only
 raf = { path = "raf", version = "0.1.0-pre", optional = true }

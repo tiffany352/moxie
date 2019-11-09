@@ -142,7 +142,7 @@ impl<State> Key<State> {
     }
 
     /// Runs `updater` with a reference to the state variable's latest value, and enqueues a commit
-    /// to the variable if `updater` returns `Some`. Returns the [`Revision`] at which the state
+    /// to the variable if `updater` returns `Some`. Returns the `Revision` at which the state
     /// variable was last rooted if the variable is live, otherwise returns `None`.
     ///
     /// Enqueuing the commit invokes the state change waker registered with the [Runtime] (if any)
