@@ -460,9 +460,8 @@ impl AnonRc {
         env.insert(self.id, self);
     }
 
-    #[doc(hidden)]
     // FIXME this should probably expose a fallible api somehow?
-    pub fn unstable_deref<T: 'static>(self) -> impl Deref<Target = T> + 'static {
+    fn unstable_deref<T: 'static>(self) -> impl Deref<Target = T> + 'static {
         OwningRef::new(self.inner).map(|anon| {
             anon.downcast_ref().unwrap_or_else(|| {
                 panic!("asked {:?} to cast to {:?}", anon, TypeId::of::<T>(),);
