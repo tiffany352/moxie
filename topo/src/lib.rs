@@ -1,4 +1,4 @@
-#![feature(core_intrinsics, track_caller)]
+#![feature(track_caller)]
 #![forbid(unsafe_code)]
 #![deny(clippy::all, missing_docs, intra_doc_link_resolution_failure)]
 
@@ -102,11 +102,9 @@ impl Callsite {
     /// Constructs a callsite whose value is unique to the source location at which it is called.
     #[track_caller]
     pub fn here() -> Self {
-        let location = std::intrinsics::caller_location();
-        Self {
-            // the pointer value for a given location is enough to differentiate it from all others
-            location: location as *const _ as usize,
-        }
+        // the pointer value for a given location is enough to differentiate it from all others
+        let location = std::panic::Location::caller() as *const _ as usize;
+        Self { location }
     }
 
     /// Returns the number of times this callsite has been seen as a child of the current Point.
