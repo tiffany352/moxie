@@ -92,5 +92,15 @@ docs-ofl = "doc --manifest-path ofl/Cargo.toml --all --no-deps"
 # tow
 
 tow = "run --manifest-path tow/Cargo.toml --"
+tow-flow = """
+watch
+    -x fmt-tow
+    -x test-tow
+    -x docs-tow
+    -x clippy-tow
+"""
 
+clippy-tow = "clippy --manifest-path tow/Cargo.toml --all"
+docs-tow = "doc --manifest-path tow/Cargo.toml --all --no-deps"
 fmt-tow = "fmt -- tow/src/main.rs"
+test-tow = "test --manifest-path tow/Cargo.toml --all"
