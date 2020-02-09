@@ -20,6 +20,7 @@ mod executor;
 use crate::memo::MemoStore;
 use executor::InBandExecutor;
 use futures::task::LocalSpawn;
+use is_same_derive::IsSame;
 use std::{
     fmt::{Debug, Formatter, Result as FmtResult},
     rc::Rc,
@@ -29,7 +30,7 @@ use std::{
 /// Revisions measure moxie's notion of time passing. Each `Runtime` increments
 /// its Revision on every iteration. `crate::Commit`s to state variables are
 /// annotated with the Revision during which they were made.
-#[derive(Clone, Copy, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Default, Eq, Hash, Ord, PartialEq, PartialOrd, IsSame)]
 pub struct Revision(pub u64);
 
 impl Revision {

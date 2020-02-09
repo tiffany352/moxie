@@ -93,7 +93,7 @@ macro_rules! child_env {
 /// useful for runtimes to offer themselves execution-local values in functions
 /// which are invoked by external code. It can also be severely abused, like any
 /// implicit state, and should be used with caution.
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone)]
 pub struct Env {
     depth: u32,
     location: (&'static str, u32, u32),

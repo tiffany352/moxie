@@ -2,6 +2,7 @@
 
 use crate::{embed::Spawner, memo::memo_with, state::*};
 use futures::future::{AbortHandle, Abortable};
+use is_same::IsSame;
 use std::{future::Future, task::Poll};
 
 /// Load a value from the future returned by `init` whenever `capture` changes,
@@ -15,7 +16,7 @@ pub fn load_with<Arg, Fut, Stored, Ret>(
     with: impl FnOnce(&Stored) -> Ret,
 ) -> Poll<Ret>
 where
-    Arg: PartialEq + 'static,
+    Arg: IsSame + 'static,
     Fut: Future<Output = Stored> + 'static,
     Stored: 'static,
     Ret: 'static,
@@ -80,7 +81,7 @@ where
 #[topo::nested]
 pub fn load<Arg, Fut, Stored>(capture: Arg, init: impl FnOnce(&Arg) -> Fut) -> Poll<Stored>
 where
-    Arg: PartialEq + 'static,
+    Arg: IsSame + 'static,
     Fut: Future<Output = Stored> + 'static,
     Stored: Clone + 'static,
 {

@@ -51,6 +51,8 @@ pub use illicit;
 #[doc(inline)]
 pub use topo_macro::nested;
 
+use is_same::IsSame;
+use is_same_derive::IsSame;
 use std::{
     cell::RefCell,
     collections::hash_map::DefaultHasher,
@@ -96,7 +98,7 @@ pub fn call_in_slot<R>(slot: impl Hash, op: impl FnOnce() -> R) -> R {
 /// invoked again. Changing the value used for the slot allows us to have stable
 /// `Id`s across multiple executions when iterating over elements of a
 /// collection that itself has unstable iteration order.
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq, IsSame)]
 pub struct Id(u64);
 
 impl Id {
@@ -187,8 +189,14 @@ impl PartialEq for Point {
     }
 }
 
+impl IsSame for Point {
+    fn is_same(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
 /// A value unique to the source location where it is created.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, IsSame)]
 pub struct Callsite {
     location: usize,
 }

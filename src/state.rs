@@ -2,6 +2,7 @@
 //! runtime that a new Revision should be executed.
 
 use crate::{embed::RunLoopWaker, memo::*};
+use is_same::IsSame;
 use parking_lot::Mutex;
 use std::{
     fmt::{Debug, Display, Formatter, Result as FmtResult},
@@ -59,7 +60,7 @@ where
 #[illicit::from_env(waker: &RunLoopWaker)]
 pub fn memo_state<Arg, Init, Output>(arg: Arg, initializer: Init) -> Key<Output>
 where
-    Arg: PartialEq + 'static,
+    Arg: IsSame + 'static,
     Output: 'static,
     for<'a> Init: FnOnce(&'a Arg) -> Output,
 {
@@ -156,13 +157,13 @@ impl<State> Key<State> {
 
 impl<State> Key<State>
 where
-    State: PartialEq,
+    State: IsSame,
 {
     /// Commits a new state value if it is unequal to the current value and the
     /// state variable is still live. Has the same properties as
     /// [update](crate::state::Key::update) regarding waking the runtime.
     pub fn set(&self, new: State) {
-        self.update(|prev| if prev == &new { None } else { Some(new) });
+        self.update(|prev| if prev.is_same(&new) { None } else { Some(new) });
     }
 }
 
@@ -205,5 +206,15 @@ impl<State> PartialEq for Key<State> {
     /// initialized in different revisions.
     fn eq(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.var, &other.var)
+    }
+}
+
+impl<State> IsSame for Key<State> {
+    /// Keys are considered equal if they point to the same state variable.
+    /// Importantly, they will compare as equal even if they contain
+    /// different snapshots of the state variable due to having been
+    /// initialized in different revisions.
+    fn is_same(&self, other: &Self) -> bool {
+        self.var.is_same(&other.var)
     }
 }

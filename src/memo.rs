@@ -1,5 +1,6 @@
 //! Moxie implements "topological memoization" with storage in its runtime.
 
+use is_same::IsSame;
 use std::{
     any::{Any, TypeId},
     cell::RefCell,
@@ -35,7 +36,7 @@ pub fn memo_with<Arg, Stored, Ret>(
     with: impl FnOnce(&Stored) -> Ret,
 ) -> Ret
 where
-    Arg: PartialEq + 'static,
+    Arg: IsSame + 'static,
     Stored: 'static,
     Ret: 'static,
 {
@@ -57,7 +58,7 @@ where
     if let Some((_liveness, boxed)) = stored {
         let boxed: Box<(Arg, Stored)> = boxed.downcast().unwrap();
 
-        if boxed.0 == arg {
+        if boxed.0.is_same(&arg) {
             let with = with.take().unwrap();
             cached = Some((with(&boxed.1), boxed));
         } else {
@@ -97,7 +98,7 @@ where
 #[topo::nested]
 pub fn memo<Arg, Stored>(arg: Arg, init: impl FnOnce(&Arg) -> Stored) -> Stored
 where
-    Arg: PartialEq + 'static,
+    Arg: IsSame + 'static,
     Stored: Clone + 'static,
 {
     memo_with(arg, init, Clone::clone)
